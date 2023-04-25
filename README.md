@@ -6,11 +6,11 @@
 
 A village of AI, that is. This is a project to create a community of AI agents that can help each other learn and grow. The goal is to create a system that can be used to train AI agents to do anything.
 
-One of the early apparent issues with groups of agents is the issue of them falling into error loops or spining off into non-productive directions. The more agents you use the more likely this is to happen.
+One of the early apparent issues with groups of agents is the issue of them falling into error loops or spinning off into non-productive directions. The more agents you use the more likely this is to happen.
 
-This project is an attempt to add Archetypes to agents to provide them with differnt personalities and goals. The idea is that the Archetypes will help keep the agents on track and prevent them from falling into error loops.
+This project is an attempt to add Archetypes to agents to provide them with different personalities and goals. The idea is that the Archetypes will help keep the agents on track and prevent them from falling into error loops.
 
-The idea for this approach to came from the work done in this fascinating paper:
+The idea for this approach came from the work done in this fascinating paper:
 
 [Generative Agents: Interactive Simulacra of Human Behaviour](https://arxiv.org/pdf/2304.03442.pdf)
 
