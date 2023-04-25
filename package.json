@@ -1,0 +1,27 @@
+{
+  "name": "village-ai",
+  "version": "1.0.0",
+  "description": "It takes a village",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foolishsailor/village-ai.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/foolishsailor/village-ai/issues"
+  },
+  "homepage": "https://github.com/foolishsailor/village-ai#readme",
+  "devDependencies": {
+    "@types/ws": "^8.5.4",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "eslint": "^8.39.0",
+    "typescript": "^5.0.4"
+  }
+}
