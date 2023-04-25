@@ -1,2 +1,5 @@
 # village-ai
-It takes a village...
+
+['village-ai'](./public/village-ai.png)
+
+## It takes a village...
