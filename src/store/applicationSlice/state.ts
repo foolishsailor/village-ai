@@ -5,11 +5,13 @@ export interface ApplicationState {
   agents: string[];
   numberOfAgents: number;
   modelType: openAImodel;
+  openAIKey?: string;
 }
 
 export const initialState: ApplicationState = {
   isConnected: false,
   agents: [],
   numberOfAgents: 0,
-  modelType: 'gpt-3.5-turbo'
+  modelType: 'gpt-3.5-turbo',
+  openAIKey: undefined
 };

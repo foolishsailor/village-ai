@@ -1,3 +1,16 @@
+/*
+
+ Usage example:
+
+ store.subscribe(() => {
+  const {
+    application: { openAIKey }
+  } = store.getState();
+
+  console.log(openAIKey);
+});
+*/
+
 import { configureStore } from '@reduxjs/toolkit';
 
 import applicationSlice from './applicationSlice/slice';

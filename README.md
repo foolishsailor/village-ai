@@ -1,6 +1,6 @@
 # village-ai
 
-!['village-ai'](./public/village-ai.png)
+![village-ai](./public/village-ai.png)
 
 ## It takes a village...
 
@@ -39,24 +39,45 @@ OPENAI_API_KEY=YOUR_KEY_HERE # required
 DEFAULT_MODEL=gpt-3.5-turbo # or gpt-4
 ```
 
-### Install Chroma
+### Install External Applications
 
-This project uses [Chroma](https://www.trychroma.com/) local instance for a vector database
+[Chroma](https://www.trychroma.com/) local instance for a vector database
 
-Note: You will need [Docker](https://www.docker.com/) to run Chroma locally.
+[Docker](https://www.docker.com/) to run Chroma in a local docker container.
+
+#### 1. Download docker here: [Docker](https://www.docker.com/) and install
+
+#### 2. Clone the Chroma repo. Place in same parent folder you have cloned this repo into
+
+example:
+
+```
+- parent-folder
+  - village-ai
+  - chroma
+```
 
 ```bash
+cd 'parent-folder'
 git clone https://github.com/chroma-core/chroma.git
 ```
 
 ### Run Chroma
+
+You can either run chroma directly
 
 ```bash
 cd chroma
 docker-compose up -d --build
 ```
 
-### Run Script
+or run from village-ai
+
+```bash
+npm run start:chroma
+```
+
+### Run Village-ai
 
 ```bash
 npm start

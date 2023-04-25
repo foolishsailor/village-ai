@@ -15,7 +15,8 @@ export const {
   addAgents,
   deteleAgents,
   setNumberOfAgents,
-  setModelType
+  setModelType,
+  setOpenAIKey
 } = slice.actions;
 
 const applicationSlice = slice.reducer;

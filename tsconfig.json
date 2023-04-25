@@ -1,19 +1,18 @@
 {
   "compilerOptions": {
     "target": "ES2018",
-    "module": "commonjs",
-    "esModuleInterop": true,
+    "module": "CommonJS",
     "strict": true,
-    "moduleResolution": "node",
-    "sourceMap": true,
+    "esModuleInterop": true,
     "outDir": "dist",
-    "rootDir": "./src",
     "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["src/*"]
     }
   },
-  "lib": ["es2015"],
-  "exclude": ["node_modules"],
-  "include": ["src"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
 }
