@@ -64,7 +64,7 @@ npm start
 
 ### Use It
 
-You should now be able to interact with the agent via the terminal or via the [AI-Lens](https://github.com/foolishsailor/ai-lens)
+You should now be able to interact with the agent via the terminal or via [AI-Lens](https://github.com/foolishsailor/ai-lens)
 
 ## Contact
 
