@@ -12,25 +12,25 @@ This project is an attempt to add Archetypes to agents to provide them with diff
 
 The idea for this approach to came from the work done in this fascinating paper:
 
-['Generative Agents: Interactive Simulacra of Human Behaviour](https://arxiv.org/pdf/2304.03442.pdf)
+[Generative Agents: Interactive Simulacra of Human Behaviour](https://arxiv.org/pdf/2304.03442.pdf)
 
 This project works directly with ['AI-Lens'](https://github.com/foolishsailor/ai-lens) that provide visualition of the agents and their interactions.
 
 ## How it works
 
-**Clone**
+### Clone
 
 ```bash
 git clone https://github.com/foolishsailor/village-ai.git
 ```
 
-**Install Dependencies**
+### Install Dependencies
 
 ```bash
 npm i
 ```
 
-**Configure Settings**
+### Configure Settings
 
 Create a local .env file in the root of the repo with the following:
 
@@ -39,7 +39,7 @@ OPENAI_API_KEY=YOUR_KEY_HERE # required
 DEFAULT_MODEL=gpt-3.5-turbo # or gpt-4
 ```
 
-**Install Chroma**
+### Install Chroma
 
 This project uses [Chroma](https://www.trychroma.com/) local instance for a vector database
 
@@ -49,22 +49,22 @@ Note: You will need [Docker](https://www.docker.com/) to run Chroma locally.
 git clone https://github.com/chroma-core/chroma.git
 ```
 
-**Run Chroma**
+### Run Chroma
 
 ```bash
 cd chroma
 docker-compose up -d --build
 ```
 
-**5. Run Script**
+### Run Script
 
 ```bash
 npm start
 ```
 
-**6. Use It**
+### Use It
 
-You should now be able to interact with the agent via the terminal or via the ['AI-Lens'](https://github.com/foolishsailor/ai-lens)
+You should now be able to interact with the agent via the terminal or via the [AI-Lens](https://github.com/foolishsailor/ai-lens)
 
 ## Contact
 
