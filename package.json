@@ -36,6 +36,7 @@
     "console": "^0.7.2",
     "dotenv": "^16.0.3",
     "install": "^0.13.0",
+    "langchain": "^0.0.64",
     "module-alias": "^2.2.2",
     "npm": "^9.6.5",
     "openai": "^3.2.1",

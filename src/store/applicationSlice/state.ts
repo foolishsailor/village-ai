@@ -1,4 +1,4 @@
-import { openAImodel } from '@/interfaces/open-ai-model';
+import { openAImodel } from '@/types/open-ai-model';
 
 export interface ApplicationState {
   isConnected: boolean;

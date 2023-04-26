@@ -5,7 +5,6 @@ export const VectorDBEventBus = new EventEmitter();
 
 /*
 [ids, embeddings, metadatas, documents, increment_index]
-
 */
 export type CollectionAddData = [
   string | string[],
@@ -42,8 +41,6 @@ export class VectorDBService {
     );
   }
 
-  // Function implementations
-
   public async listCollections() {
     return await this.vectorClient.listCollections();
   }
@@ -63,6 +60,10 @@ export class VectorDBService {
   }
 
   public async createCollection(collectionName: string) {
+    const check = await this.vectorClient.getCollection(collectionName);
+
+    if (check) return check;
+
     return await this.vectorClient.createCollection(
       collectionName,
       {},

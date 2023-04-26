@@ -19,7 +19,6 @@
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
-    "linebreak-style": ["warn", "windows"],
-    "quotes": ["warn", "single"]
+    "linebreak-style": ["warn", "windows"]
   }
 }
