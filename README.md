@@ -1,4 +1,5 @@
 # village-ai
+*** in development ***
 
 ![village-ai](./public/village-ai.png)
 
