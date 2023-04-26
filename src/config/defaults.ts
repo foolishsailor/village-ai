@@ -24,3 +24,5 @@ export const OPENAI_ORGANIZATION = process.env.OPENAI_ORGANIZATION || '';
 export const AZURE_DEPLOYMENT_ID = process.env.AZURE_DEPLOYMENT_ID || '';
 
 export const CODE_BLOCK_DELIMITER = '```';
+
+export const MULTILINE_DELIMITER = `% ${'ff9d7713-0bb0-40d4-823c-5a66de48761b'}`;

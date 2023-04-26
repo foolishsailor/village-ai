@@ -8,18 +8,16 @@ dotenv.config();
 
 const vector = vectorDb;
 (async () => {
-  const collection = await vector.createCollection('test');
-
-  const completion = await createChatCompletion({
-    systemPrompt: roles.Manager.prompt,
-    messages: [
-      {
-        role: 'user',
-        content:
-          'I have given you a role now pretend ou are that role and Tell me about yourself'
-      }
-    ]
-  });
-
-  console.log('completion', JSON.stringify(completion.choices));
+  // const collection = await vector.createCollection('test');
+  // const completion = await createChatCompletion({
+  //   systemPrompt: roles.Manager.prompt,
+  //   messages: [
+  //     {
+  //       role: 'user',
+  //       content:
+  //         'I have given you a role now pretend ou are that role and Tell me about yourself'
+  //     }
+  //   ]
+  // });
+  // console.log('completion', JSON.stringify(completion.choices));
 })();
