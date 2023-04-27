@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv';
 import * as console from 'console';
 import { ChromaClient, Collection, OpenAIEmbeddingFunction } from 'chromadb';
 
-import { VectorDBService } from './factories/vectorDBservice';
+import { VectorDB } from './vector-db';
 import { setOpenAIKey } from '@/store/applicationSlice/slice';
 
 dotenv.config();
@@ -19,4 +19,4 @@ store.dispatch(setOpenAIKey(process.env.OPENAI_API_KEY));
 const client = new ChromaClient();
 const embedding = new OpenAIEmbeddingFunction(process.env.OPENAI_API_KEY);
 
-export const vectorDb = new VectorDBService(client, embedding);
+export const vectorDb = new VectorDB(client, embedding);

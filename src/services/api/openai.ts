@@ -1,4 +1,4 @@
-import { Message } from '@/types/chat';
+import { ChatMessage } from '@/types/chat';
 import { OpenAIModel } from '@/types/openai';
 
 import {
@@ -36,7 +36,7 @@ export type OpenAIMessageProps = {
   systemPrompt?: string;
   temperature?: number;
   tokens?: number;
-  messages: Message[];
+  messages: ChatMessage[];
 };
 
 export const createChatCompletion = async ({

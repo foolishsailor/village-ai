@@ -1,6 +1,6 @@
 import { OpenAIModel } from '@/types/openai';
 
-export interface Message {
+export interface ChatMessage {
   role: ChatRole;
   content: string;
 }
@@ -9,7 +9,7 @@ export type ChatRole = 'assistant' | 'user' | 'system';
 
 export interface ChatBody {
   model: OpenAIModel;
-  messages: Message[];
+  messages: ChatMessage[];
   key: string;
   prompt: string;
   temperature: number;
@@ -18,7 +18,7 @@ export interface ChatBody {
 export interface Conversation {
   id: string;
   name: string;
-  messages: Message[];
+  messages: ChatMessage[];
   model: OpenAIModel;
   prompt: string;
   temperature: number;

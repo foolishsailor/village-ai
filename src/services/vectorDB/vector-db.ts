@@ -14,7 +14,7 @@ export type CollectionAddData = [
   boolean | undefined
 ];
 
-export class VectorDBService {
+export class VectorDB {
   // NOTE: The ChromaClient and OpenAIEmbeddingFunction types need to be replaced
   // with generics a implment a class that exposes more generic functions so that other vector dbs can be used
   // need to look at the other providers to see what common terminology and functionality is shared
