@@ -22,6 +22,17 @@ class VectorDBEventBusClass extends EventEmitter {
     event: 'addDataToCollection',
     listener: (collectionName: string, memory: Memory) => void
   ): this;
+
+  //Events external functions classes listen to
+  on(
+    event: 'createCollectionResult',
+    listener: (collectionName: string, collection: Collection) => void
+  ): this;
+  on(
+    event: 'addDataToCollectionResult',
+    listener: (collectionName: string, collection: Collection) => void
+  ): this;
+
   on(event: string | symbol, listener: (...args: any[]) => void): this {
     return super.on(event, listener);
   }
@@ -29,7 +40,11 @@ class VectorDBEventBusClass extends EventEmitter {
   //Events class broadcasts
   emit(event: 'listCollectionsResult', collections: Collection[]): boolean;
   emit(event: 'getCollectionResult', collection: Collection | null): boolean;
-  emit(event: 'createCollectionResult', collection: Collection): boolean;
+  emit(
+    event: 'createCollectionResult',
+    collectionName: string,
+    collection: Collection
+  ): boolean;
   emit(
     event: 'addDataToCollectionResult',
     collectionName: string,
@@ -83,7 +98,10 @@ export class VectorDB {
   }
 
   public async getCollection(collectionName: string): Promise<void> {
-    const collection = await this.vectorClient.getCollection(collectionName);
+    const collection = await this.vectorClient.getCollection(
+      collectionName,
+      this.embeddingService
+    );
 
     if (!collection) {
       VectorDBEventBus.emit('getCollectionResult', null);
@@ -98,45 +116,52 @@ export class VectorDB {
   }
 
   public async createCollection(collectionName: string): Promise<void> {
-    const check = await this.vectorClient.getCollection(collectionName);
-
-    if (check) {
-      VectorDBEventBus.emit('createCollectionResult', check);
-      return;
-    }
-
     const result = await this.vectorClient.createCollection(
       collectionName,
       {},
       this.embeddingService
     );
-    VectorDBEventBus.emit('createCollectionResult', result);
+
+    console.log('collection created');
+    VectorDBEventBus.emit('createCollectionResult', collectionName, result);
   }
 
   public async addDataToCollection(
     collectionName: string,
     memory: Memory
   ): Promise<void> {
-    // data: CollectionAddData
-    const collection = await this.vectorClient.getCollection(collectionName);
+    console.log('add data to collection', collectionName, memory);
+    const collection = await this.vectorClient.getCollection(
+      collectionName,
+      this.embeddingService
+    );
 
     if (!collection) {
+      console.log('collection not found');
       VectorDBEventBus.emit('addDataToCollectionResult', collectionName, false);
-      return;
+    } else {
+      console.log('collection', collection);
+
+      const memoryCount = await collection.count();
+
+      console.log('memoryCount', memoryCount);
+      const embedMemory =
+        memory.type === 'message'
+          ? JSON.stringify(memory.content)
+          : (memory.content as string);
+
+      console.log('embedMemory', embedMemory);
+      const result = await collection.add(
+        (memoryCount + 1).toString(),
+        undefined,
+        [{ type: memory.type }],
+        embedMemory
+      );
+      VectorDBEventBus.emit(
+        'addDataToCollectionResult',
+        collectionName,
+        result
+      );
     }
-
-    const memoryCount = await collection.count();
-    const embedMemory =
-      memory.type === 'message'
-        ? JSON.stringify(memory.content)
-        : (memory.content as string);
-
-    const result = await collection.add(
-      memoryCount,
-      undefined,
-      [{ type: memory.type }],
-      embedMemory
-    );
-    VectorDBEventBus.emit('addDataToCollectionResult', collectionName, result);
   }
 }

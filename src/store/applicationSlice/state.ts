@@ -6,6 +6,7 @@ export interface ApplicationState {
   numberOfAgents: number;
   modelType: openAImodel;
   openAIKey?: string;
+  tokensUsed: number;
 }
 
 export const initialState: ApplicationState = {
@@ -13,5 +14,6 @@ export const initialState: ApplicationState = {
   agents: [],
   numberOfAgents: 0,
   modelType: 'gpt-3.5-turbo',
-  openAIKey: undefined
+  openAIKey: undefined,
+  tokensUsed: 0
 };

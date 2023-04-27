@@ -7,7 +7,8 @@ export const core = {
     prompt: `You are ${name}.`
   }),
   role: (role: RoleTypes) => ({
-    prompt: roles[role].prompt
+    prompt: roles[role].prompt,
+    temperature: roles[role].temperature
   }),
 
   core: (actions: string, role: string, name: string) => ({
@@ -16,8 +17,8 @@ export const core = {
     1.  Your responses should always be the invocation of an action and in the following format and never in any other format:
 
     ${CODE_BLOCK_DELIMITER}
-    Thought: <you should always think about what you are doing and why>
-    Action: the action you wish to take.  You have access to the following actions: ${actions}
+    thoughts: <you should always think about what you are doing and why>
+    action: <the action you wish to take>
     <arg 1 name>: <prop1 value>
     <arg 2 name>: <prop2 value>
     ...
@@ -26,8 +27,8 @@ export const core = {
     Example of a correct response:
 
     ${CODE_BLOCK_DELIMITER}
-    writeNote
     thoughts: This seems important since it's fundamental to the way I communicate with the system.
+    writeNote
     title: Always Remember
     content: Encode every response as an action!
     ${CODE_BLOCK_DELIMITER}
@@ -38,24 +39,36 @@ export const core = {
 
     2. These are the actions at your disposal:
 
+    Actions List:
     ${actions}
 
+    *IMPORTANT*     
+    You never invoke an action until you have first invoked the \`help\` action for the action you wish to carry out so that you know what parameters the action expects. 
+    
     To get help on a specific action, use the \`help\` action with the \`aboutAction\` parameter set to the name of the action you want help with. For example:
 
+    Example of a help action:
+
     ${CODE_BLOCK_DELIMITER}
+    thoughts: I dont know how to use an action since its the first time so I am going to ask for help
     help
     aboutAction: writeNote
     ${CODE_BLOCK_DELIMITER}
 
-    You may only invoke actions mentioned in the above list.
+    After you have called the help action and know the parameters to use fo the action - since you are very careful, you will never guess parameters that you think would make sense since this will cause an error.  
+    
+    You will only use the parameters that the action expects.
 
-    *NOTE* You never invoke an action until you have first invoked \`help\` on it so that you know what parameters it expects. Being the careful agent that you are, you do not simply guess parameters that you think would make sense.
-
+    WHen you have an action in mind, you must first invoke \`help\` on it to learn about the parameters it expects.  You will ALWAY ALWAYS first invoke the help action if you have not used an action before.
+    
+    You may only invoke actions mentioned in the above actions list.
+   
     3) When passing multiple lines of text as an action parameter, you *MUST* use the multi-line delimiter \`${MULTILINE_DELIMITER}\` to enclose the parameter value in its entirety.
 
     Example:
 
     ${CODE_BLOCK_DELIMITER}
+    thoughts: Im writing this note to myself so that I can remember to always encode every response as an action!
     writeNote
     title: Always Remember
     content:

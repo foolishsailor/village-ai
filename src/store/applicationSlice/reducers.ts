@@ -35,5 +35,8 @@ export const reducers = {
   },
   setOpenAIKey: (state: ApplicationState, action: PayloadAction<string>) => {
     state.openAIKey = action.payload;
+  },
+  setTokensUsed: (state: ApplicationState, action: PayloadAction<number>) => {
+    state.tokensUsed = state.tokensUsed + action.payload;
   }
 };
