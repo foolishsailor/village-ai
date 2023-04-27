@@ -1,6 +1,16 @@
 import * as dotenv from 'dotenv';
-import { vectorDB } from '@/services/vectorDB/chroma-db-service';
+import { chromaDB, client } from '@/services/vectorDB/chroma-db-service';
 import SocketServer from '@/services/socket-server/socket-server';
+import { logger, LogLevel, LogOptions } from '@/services/logger';
+
+const options: LogOptions = {
+  toConsole: true,
+  toFile: true,
+  filePath: 'logs.txt'
+};
+
+logger.setOptions(LogLevel.Info, options);
+
 import { agent } from '@/agents/agent';
 
 dotenv.config();
@@ -8,9 +18,7 @@ dotenv.config();
 SocketServer(4331);
 
 (async () => {
-  const collections = await vectorDB.listCollections();
-
-  console.log('collections', collections);
+  //client.reset();
 
   const manager = agent({
     name: 'Bob',

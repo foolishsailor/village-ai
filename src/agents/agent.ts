@@ -3,9 +3,9 @@ import { core } from '@/agents/prompts';
 import { actionNames } from '@/agents/actions';
 import { RoleTypes } from '@/types/roles';
 import { messageBus } from '@/services/message-bus';
-import { VectorDBEventBus } from '@/services/vectorDB/vector-db';
 import { Message } from '@/types/message';
 import { createChatCompletion } from '@/services/api/openai';
+import { chromaDB } from '@/services/vectorDB/chroma-db-service';
 import { Collection } from 'chromadb';
 
 export type Agent = {
@@ -23,66 +23,44 @@ export const agent = async ({ name, role, goal }: Agent) => {
   const identityPrompt = core.identity(name).prompt;
   const rolePrompt = core.role(role).prompt;
   const corePrompt = core.core(actionNames, role, name).prompt;
-
   const agentGoal = goal;
-  const memroyCollectionName = `${agentID}-${name}`.toLowerCase();
-
+  const memoryCollectionName = `${agentID}-${name}`.toLowerCase();
   const agentTasks: string[] = [];
 
   const messageListener = (message: Message) => {
-    if (message.destination.includes(memroyCollectionName)) {
-      VectorDBEventBus.emit('addDataToCollection', memroyCollectionName, {
-        type: 'message',
-        content: message
-      });
+    if (message.destination.includes(memoryCollectionName)) {
+      console.log('message', message);
     }
   };
 
   messageBus.subscribe(messageListener);
 
   const initAgent = async () => {
-    VectorDBEventBus.emit('createCollection', memroyCollectionName);
+    const collection = await chromaDB.createCollection(memoryCollectionName);
 
-    VectorDBEventBus.on(
-      'addDataToCollectionResult',
-      (collectionName: string, result: any) => {
-        if (collectionName === collectionName) {
-          console.log('result', result);
+    const initialCompletion = await createChatCompletion({
+      systemPrompt: `${identityPrompt} ${rolePrompt} ${corePrompt}`,
+      messages: [
+        {
+          role: 'user',
+          content: agentGoal
         }
-      }
-    );
+      ],
+      temperature: core.role(role).temperature
+    });
 
-    VectorDBEventBus.on(
-      'createCollectionResult',
-      async (collectionName: string, collection: Collection) => {
-        console.log('collection creation result received', collectionName);
-        if (collectionName === memroyCollectionName && collection) {
-          console.log('collection created send initiating message');
-          const initialCompletion = await createChatCompletion({
-            systemPrompt: `${identityPrompt} ${rolePrompt} ${corePrompt}`,
-            messages: [
-              {
-                role: 'user',
-                content: agentGoal
-              }
-            ],
-            temperature: core.role(role).temperature
-          });
+    console.log('initialCompletion', initialCompletion);
 
-          console.log(
-            'initialCompletion',
-            initialCompletion,
-            initialCompletion.choices
-          );
+    const addMemory = await chromaDB.addDataToCollection(memoryCollectionName, {
+      type: 'message',
+      content: initialCompletion.choices[initialCompletion.choices.length - 1]
+    });
 
-          VectorDBEventBus.emit('addDataToCollection', memroyCollectionName, {
-            type: 'message',
-            content:
-              initialCompletion.choices[initialCompletion.choices.length - 1]
-          });
-        }
-      }
-    );
+    console.log('addMemory', addMemory);
+
+    const getMemory = await collection.get();
+
+    console.log('getMemory', getMemory);
   };
 
   initAgent();
