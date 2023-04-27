@@ -3,34 +3,60 @@ import { core } from '@/agents/prompts';
 import { actionNames } from '@/agents/actions';
 import { RoleTypes } from '@/types/roles';
 import { messageBus } from '@/services/message-bus';
+import { VectorDBEventBus } from '@/services/vectorDB/vector-db';
 import { Message } from '@/types/message';
+import { createChatCompletion } from '@/services/api/openai';
 
 export type Agent = {
   name: string;
   role: RoleTypes;
+  goal: string;
 };
 
-export const agent = ({ name, role }: Agent) => {
+export const agent = async ({ name, role, goal }: Agent) => {
   const {
     application: { numberOfAgents }
   } = store.getState();
 
   const agentID = (numberOfAgents + 1).toString();
-  const identityPrompt = core.identity(name);
-  const rolePrompt = core.role(role);
-  const corePrompt = core.core(actionNames, role, name);
+  const identityPrompt = core.identity(name).prompt;
+  const rolePrompt = core.role(role).prompt;
+  const corePrompt = core.core(actionNames, role, name).prompt;
 
-  const agentGoal = '';
+  const agentGoal = goal;
   const agentTasks: string[] = [];
 
   const messageListener = (message: Message) => {
     if (message.destination.includes(agentID)) {
-      // save memory to vector
+      VectorDBEventBus.emit('addDataToCollection', agentID, {
+        type: 'message',
+        content: message
+      });
     }
   };
 
   messageBus.subscribe(messageListener);
 
+  const initAgent = async () => {
+    const initialCompletion = await createChatCompletion({
+      systemPrompt: `${identityPrompt} ${rolePrompt} ${corePrompt}`,
+      messages: [
+        {
+          role: 'user',
+          content: agentGoal
+        }
+      ]
+    });
+
+    console.log('initialCompletion', initialCompletion.choices);
+
+    VectorDBEventBus.emit('addDataToCollection', agentID, {
+      type: 'message',
+      content: initialCompletion
+    });
+  };
+
+  initAgent();
   /*
 Ok so need the follooing:
 
@@ -60,6 +86,12 @@ How to handle tasks that are desinged to keep agents on rails like the Fool and 
 */
 
   return {
+    addTask: () => {},
+    removeTask: () => {},
+    updateTask: () => {},
+    addUpdateGoal: () => {},
+    getAgentIdentity: () => {},
+    act: () => {},
     deleteAgent: () => {
       // delete agent
       messageBus.unsubscribe(messageListener);

@@ -1,11 +1,7 @@
+import { Memory } from '@/types/memory';
 import { ChromaClient, Collection, OpenAIEmbeddingFunction } from 'chromadb';
 import { EventEmitter } from 'events';
 
-export const VectorDBEventBus = new EventEmitter();
-
-/*
-[ids, embeddings, metadatas, documents, increment_index]
-*/
 export type CollectionAddData = [
   string | string[],
   number[] | number[][] | undefined,
@@ -14,10 +10,50 @@ export type CollectionAddData = [
   boolean | undefined
 ];
 
+class VectorDBEventBusClass extends EventEmitter {
+  //Events class listens to
+  on(event: 'listCollections', listener: () => void): this;
+  on(event: 'getCollection', listener: (collectionName: string) => void): this;
+  on(
+    event: 'createCollection',
+    listener: (collectionName: string) => void
+  ): this;
+  on(
+    event: 'addDataToCollection',
+    listener: (collectionName: string, memory: Memory) => void
+  ): this;
+  on(event: string | symbol, listener: (...args: any[]) => void): this {
+    return super.on(event, listener);
+  }
+
+  //Events class broadcasts
+  emit(event: 'listCollectionsResult', collections: Collection[]): boolean;
+  emit(event: 'getCollectionResult', collection: Collection | null): boolean;
+  emit(event: 'createCollectionResult', collection: Collection): boolean;
+  emit(
+    event: 'addDataToCollectionResult',
+    collectionName: string,
+    result: any
+  ): boolean;
+
+  //Events that can be emmited by external functions/events
+  emit(event: 'listCollections', collections: Collection[]): boolean;
+  emit(event: 'getCollection', collectionName: string): boolean;
+  emit(event: 'createCollection', collectionName: string): boolean;
+  emit(
+    event: 'addDataToCollection',
+    collectionName: string,
+    memory: Memory
+  ): boolean;
+
+  emit(event: string | symbol, ...args: any[]): boolean {
+    return super.emit(event, ...args);
+  }
+}
+
+export const VectorDBEventBus = new VectorDBEventBusClass();
+
 export class VectorDB {
-  // NOTE: The ChromaClient and OpenAIEmbeddingFunction types need to be replaced
-  // with generics a implment a class that exposes more generic functions so that other vector dbs can be used
-  // need to look at the other providers to see what common terminology and functionality is shared
   private vectorClient: ChromaClient;
   private embeddingService: OpenAIEmbeddingFunction;
 
@@ -41,61 +77,66 @@ export class VectorDB {
     );
   }
 
-  public async listCollections() {
-    return await this.vectorClient.listCollections();
+  public async listCollections(): Promise<void> {
+    const collections: Collection[] = await this.vectorClient.listCollections();
+    VectorDBEventBus.emit('listCollectionsResult', collections);
   }
 
-  public async getCollection(collectionName: string) {
-    const collections = await this.vectorClient.listCollections();
-    const collection = collections.find(
-      (collection: Collection) => collection.name === collectionName
-    );
+  public async getCollection(collectionName: string): Promise<void> {
+    const collection = await this.vectorClient.getCollection(collectionName);
 
-    if (!collection) return null;
+    if (!collection) {
+      VectorDBEventBus.emit('getCollectionResult', null);
+      return;
+    }
 
-    return await this.vectorClient.getCollection(
+    const result = await this.vectorClient.getCollection(
       collectionName,
       this.embeddingService
     );
+    VectorDBEventBus.emit('getCollectionResult', result);
   }
 
-  public async createCollection(collectionName: string) {
+  public async createCollection(collectionName: string): Promise<void> {
     const check = await this.vectorClient.getCollection(collectionName);
 
-    if (check) return check;
+    if (check) {
+      VectorDBEventBus.emit('createCollectionResult', check);
+      return;
+    }
 
-    return await this.vectorClient.createCollection(
+    const result = await this.vectorClient.createCollection(
       collectionName,
       {},
       this.embeddingService
     );
+    VectorDBEventBus.emit('createCollectionResult', result);
   }
 
   public async addDataToCollection(
-    collection: Collection,
-    data: CollectionAddData
-  ) {
-    return await collection.add(...data);
-  }
+    collectionName: string,
+    memory: Memory
+  ): Promise<void> {
+    // data: CollectionAddData
+    const collection = await this.vectorClient.getCollection(collectionName);
 
-  // Pub/sub methods
+    if (!collection) {
+      VectorDBEventBus.emit('addDataToCollectionResult', collectionName, false);
+      return;
+    }
 
-  public async emitListCollections() {
-    VectorDBEventBus.emit('listCollections');
-  }
+    const memoryCount = await collection.count();
+    const embedMemory =
+      memory.type === 'message'
+        ? JSON.stringify(memory.content)
+        : (memory.content as string);
 
-  public async emitGetCollection(collectionId: string) {
-    VectorDBEventBus.emit('getCollection', collectionId);
-  }
-
-  public async emitCreateCollection(collectionData: any) {
-    VectorDBEventBus.emit('createCollection', collectionData);
-  }
-
-  public async emitAddDataToCollection(
-    collection: Collection,
-    data: CollectionAddData
-  ) {
-    VectorDBEventBus.emit('addDataToCollection', collection, data);
+    const result = await collection.add(
+      memoryCount,
+      undefined,
+      [{ type: memory.type }],
+      embedMemory
+    );
+    VectorDBEventBus.emit('addDataToCollectionResult', collectionName, result);
   }
 }

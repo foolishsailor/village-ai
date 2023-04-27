@@ -1,6 +1,6 @@
 import { createServer } from 'http';
 import { Server as IOServer, Socket } from 'socket.io';
-import { InMemoryBus } from '@/services/messageBus/in-memory-bus';
+import { messageBus } from '@/services/message-bus';
 
 import { messageBuilder } from '@/utils/message';
 
@@ -23,7 +23,7 @@ const SocketServer = (port: number): void => {
   io.on('connection', (socket: Socket) => {
     console.log('A user connected');
 
-    InMemoryBus.subscribe((message) => {
+    messageBus.subscribe((message) => {
       socket.emit('message', message);
     });
 
@@ -38,7 +38,7 @@ const SocketServer = (port: number): void => {
           break;
 
         case 'message':
-          InMemoryBus.send(
+          messageBus.send(
             messageBuilder({
               type: 'agent',
               source: message.agentIds || '',
