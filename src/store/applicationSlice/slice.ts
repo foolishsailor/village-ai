@@ -13,7 +13,7 @@ export const {
   setIsConnected,
   setActiveAgents,
   addAgents,
-  deteleAgents,
+  deleteAgents: deteleAgents,
   setNumberOfAgents,
   setModelType,
   setOpenAIKey

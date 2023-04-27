@@ -5,6 +5,9 @@ export const agents = {
       agentId: {
         description: 'The ID of the agent to add'
       },
+      agentName: {
+        description: 'The name of the agent to add'
+      },
       agentRole: {
         description: 'The role of the agent to add'
       }

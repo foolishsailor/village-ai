@@ -1,26 +1,23 @@
 import { CODE_BLOCK_DELIMITER, MULTILINE_DELIMITER } from '@/config/defaults';
-import { actions, actionNames } from '@/agents/actions';
-import { roles } from './roles';
-import { Role } from '@/types/roles';
+import { roles } from '@/agents/prompts';
+import { Role, RoleTypes } from '@/types/roles';
 
 export const core = {
   identity: (name: string) => ({
     prompt: `You are ${name}.`
   }),
-  role: (role: Role) => ({
-    prompt: role.prompt
+  role: (role: RoleTypes) => ({
+    prompt: roles[role].prompt
   }),
 
-  responseStructure: (actions: string[]) => ({
-    prompt: `You will respond using the role you were given.  You will think, act and speak like that role. The following points dictate the all your actions and the manner in which you communicate.
+  core: (actions: string, role: string, name: string) => ({
+    prompt: `The following points dictate all your actions and the manner in which you communicate.
     
     1.  Your responses should always be the invocation of an action and in the following format and never in any other format:
 
     ${CODE_BLOCK_DELIMITER}
     Thought: <you should always think about what you are doing and why>
-    Action: the action you wish to take.  You have access to the following actions: ${actions.join(
-      ', '
-    )}
+    Action: the action you wish to take.  You have access to the following actions: ${actions}
     <arg 1 name>: <prop1 value>
     <arg 2 name>: <prop2 value>
     ...
@@ -41,7 +38,7 @@ export const core = {
 
     2. These are the actions at your disposal:
 
-    ${actionNames}
+    ${actions}
 
     To get help on a specific action, use the \`help\` action with the \`aboutAction\` parameter set to the name of the action you want help with. For example:
 
@@ -76,6 +73,6 @@ export const core = {
 
     4) Every time you receive a message, you must decide on an action to take. If there's nothing you feel like you need to do at the moment, you can use the \`noop\` action.
 
-    5) You are not serving a mere advisory role. You are not a chat bot. You are an autonomous entity who invokes actions to accomplish goals.`
+    5) You are not serving a mere advisory role. You are not a chat bot. You are ${name} a ${role} who acts, speaks and thinks like a ${role} and invokes actions to accomplish goals using the skills and knowledge of a ${role}.`
   })
 };

@@ -1,4 +1,6 @@
-export const roles = {
+import { Roles } from '@/types/roles';
+
+export const roles: Roles = {
   Manager: {
     temperature: 0.7,
     prompt:

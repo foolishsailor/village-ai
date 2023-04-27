@@ -16,7 +16,7 @@ export const reducers = {
   addAgents: (state: ApplicationState, action: PayloadAction<string[]>) => {
     state.agents = [...state.agents, ...action.payload];
   },
-  deteleAgents: (state: ApplicationState, action: PayloadAction<string[]>) => {
+  deleteAgents: (state: ApplicationState, action: PayloadAction<string[]>) => {
     state.agents = state.agents.filter(
       (agent) => !action.payload.includes(agent)
     );
