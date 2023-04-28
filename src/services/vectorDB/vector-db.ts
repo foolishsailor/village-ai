@@ -125,22 +125,17 @@ export class VectorDB {
 
       const memoryCount = await collection.count();
 
-      const embedMemory =
-        memory.type === 'message'
-          ? JSON.stringify(memory.content)
-          : (memory.content as string);
-
       logger.debug(
         'VectorDB',
         'addDataToCollection',
-        `embedMemory: ${embedMemory}`
+        `embedMemory: ${memory.content}`
       );
 
       return await collection.add(
         (memoryCount + 1).toString(),
         undefined,
-        [{ type: memory.type }],
-        embedMemory
+        memory.types,
+        memory.content
       );
     }
   }

@@ -1,6 +1,7 @@
-import { CODE_BLOCK_DELIMITER, MULTILINE_DELIMITER } from '@/config/defaults';
+import { MULTILINE_DELIMITER } from '@/config/defaults';
 import { roles } from '@/agents/prompts';
-import { Role, RoleTypes } from '@/types/roles';
+import { RoleTypes } from '@/types/roles';
+import { promptFormats } from './prompt-formats';
 
 export const core = {
   identity: (name: string) => ({
@@ -16,26 +17,15 @@ export const core = {
     
     1.  Your responses should always be the invocation of an action and in the following format and never in any other format:
 
-    ${CODE_BLOCK_DELIMITER}
-    thoughts: <you should always think about what you are doing and why>
-    action: <the action you wish to take>
-    <arg 1 name>: <prop1 value>
-    <arg 2 name>: <prop2 value>
-    ...
-    ${CODE_BLOCK_DELIMITER}
+    ${promptFormats.defaultActionFormat}
 
     Example of a correct response:
 
-    ${CODE_BLOCK_DELIMITER}
-    thoughts: This seems important since it's fundamental to the way I communicate with the system.
-    writeNote
-    title: Always Remember
-    content: Encode every response as an action!
-    ${CODE_BLOCK_DELIMITER}
+    ${promptFormats.defaultActionCorrectExample}
+    
+    Example of an incorrect response:
 
-    ${CODE_BLOCK_DELIMITER}
-    Note to self: always encode every response as an action!
-    ${CODE_BLOCK_DELIMITER}
+    ${promptFormats.defaultActionCorrectExample}
 
     2. These are the actions at your disposal:
 
@@ -49,11 +39,7 @@ export const core = {
 
     Example of a help action:
 
-    ${CODE_BLOCK_DELIMITER}
-    thoughts: I dont know how to use an action since its the first time so I am going to ask for help
-    help
-    aboutAction: writeNote
-    ${CODE_BLOCK_DELIMITER}
+    ${promptFormats.helpActionCorrectExample}
 
     After you have called the help action and know the parameters to use fo the action - since you are very careful, you will never guess parameters that you think would make sense since this will cause an error.  
     
@@ -67,20 +53,7 @@ export const core = {
 
     Example:
 
-    ${CODE_BLOCK_DELIMITER}
-    thoughts: Im writing this note to myself so that I can remember to always encode every response as an action!
-    writeNote
-    title: Always Remember
-    content:
-    ${MULTILINE_DELIMITER}
-    Encode
-    every
-    response
-    as
-    an
-    action!
-    ${MULTILINE_DELIMITER}
-    ${CODE_BLOCK_DELIMITER}
+    ${promptFormats.addMemoryMultilineCorrectExample}
 
     Notice that both the start and end delimiters appear on lines by themselves, and they enclose the \`message\` parameter value in its entirety.
 

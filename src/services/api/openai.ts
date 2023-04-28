@@ -1,5 +1,4 @@
-import { ChatMessage } from '@/types/chat';
-import { OpenAIModel } from '@/types/openai';
+import { OpenAIApiResponse, OpenAIMessageRequestProps } from '@/types/openai';
 
 import {
   OPENAI_API_KEY,
@@ -30,15 +29,6 @@ const url =
     ? `${OPENAI_API_HOST}/openai/deployments/${AZURE_DEPLOYMENT_ID}/chat/completions?api-version=${OPENAI_API_VERSION}`
     : `${OPENAI_API_HOST}/v1/chat/completions`;
 
-export type OpenAIMessageProps = {
-  key?: string;
-  model?: OpenAIModel;
-  systemPrompt?: string;
-  temperature?: number;
-  tokens?: number;
-  messages: ChatMessage[];
-};
-
 export const createChatCompletion = async ({
   model,
   systemPrompt,
@@ -46,7 +36,7 @@ export const createChatCompletion = async ({
   key,
   tokens,
   messages
-}: OpenAIMessageProps) => {
+}: OpenAIMessageRequestProps): Promise<OpenAIApiResponse> => {
   const res = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',

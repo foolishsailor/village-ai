@@ -2,12 +2,7 @@ import { createServer } from 'http';
 import { Server as IOServer, Socket } from 'socket.io';
 import { messageBus } from '@/services/message-bus';
 
-import { messageBuilder } from '@/utils/message';
-
-import {
-  CommandMessage,
-  commandMessageReducer
-} from './commands/command-reducer';
+import { commandMessageReducer } from './commands/command-reducer';
 import { CommandActions } from './commands/command-actions';
 
 const SocketServer = (port: number): void => {
@@ -38,14 +33,13 @@ const SocketServer = (port: number): void => {
           break;
 
         case 'message':
-          messageBus.send(
-            messageBuilder({
-              type: 'agent',
-              source: message.agentIds || '',
-              destination: message.destination || [],
-              content: message.content
-            })
-          );
+          messageBus.send({
+            type: 'agent',
+            sourceType: 'agent',
+            source: message.agentIds || '',
+            destination: message.destination || [],
+            content: message.content
+          });
           break;
       }
     });

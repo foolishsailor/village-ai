@@ -1,10 +1,10 @@
-import { openAImodel } from '@/types/open-ai-model';
+import { OpenAImodelTypes } from '@/types/openai';
 
 export interface ApplicationState {
   isConnected: boolean;
   agents: string[];
   numberOfAgents: number;
-  modelType: openAImodel;
+  modelType: OpenAImodelTypes;
   openAIKey?: string;
   tokensUsed: number;
 }

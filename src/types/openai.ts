@@ -1,9 +1,47 @@
+export type OpenAImodelTypes = 'gpt-3.5-turbo' | 'gpt-4';
+export type OpenAIRole = 'assistant' | 'user' | 'system';
+
+export interface OpenAIMessage {
+  role: OpenAIRole;
+  content: string;
+}
+
+export interface Usage {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+}
+
+export interface Choices {
+  index: number;
+  finish_reason: string;
+  message: OpenAIMessage;
+}
+
+export interface OpenAIApiResponse {
+  id: string;
+  object: string;
+  created: number;
+  model: OpenAImodelTypes;
+  usage: Usage;
+  choices: Choices[];
+}
+
 export interface OpenAIModel {
   id: string;
   name: string;
   maxLength: number; // maximum length of a message
   tokenLimit: number;
 }
+
+export type OpenAIMessageRequestProps = {
+  key?: string;
+  model?: OpenAIModel;
+  systemPrompt?: string;
+  temperature?: number;
+  tokens?: number;
+  messages: OpenAIMessage[];
+};
 
 export enum OpenAIModelID {
   GPT_3_5 = 'gpt-3.5-turbo',

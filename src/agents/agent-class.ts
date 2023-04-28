@@ -6,16 +6,11 @@ import { messageBus } from '@/services/message-bus';
 import { Message } from '@/types/message';
 import { createChatCompletion } from '@/services/api/openai';
 import { chromaDB } from '@/services/vectorDB/chroma-db-service';
-import {
-  agentMessageBuilder,
-  MessageBuilder
-} from '@/agents/agent-message-builder';
+import { agentMessageBuilder } from '@/agents/agent-message-builder';
 import { addAgents } from '@/store/applicationSlice';
 import { processAIResponse } from './process-ai-response';
 import { logger } from '@/services/logger';
 import { OpenAIMessageRequestProps } from '@/types/openai';
-import { Collection } from 'chromadb';
-import { GetEmbeddingIncludeEnum } from 'chromadb/dist/main/generated';
 
 export type AgentProps = {
   name: string;
@@ -28,93 +23,52 @@ export class Agent {
   agentName: string;
   agentGoal: string;
   agentTasks: string[] = [];
-  memory!: Collection;
-  initializeAgent: (goal: string) => OpenAIMessageRequestProps;
-  buildMessage: ({
-    message,
-    prefix,
-    messages
-  }: MessageBuilder) => OpenAIMessageRequestProps;
 
   constructor({ name, role, goal }: AgentProps) {
     const {
       application: { numberOfAgents }
     } = store.getState();
 
-    const { initializeAgent, buildMessage } = agentMessageBuilder(role, name);
-
-    this.initializeAgent = initializeAgent;
-    this.buildMessage = buildMessage;
     this.agentID = `${name}_${(numberOfAgents + 1).toString()}`.toLowerCase();
     this.agentName = name;
     this.agentGoal = goal;
 
-    (async () => {
-      this.memory = await chromaDB.createCollection(
-        `${name}_${(numberOfAgents + 1).toString()}`.toLowerCase()
-      );
-    })();
+    const { initializeAgent, buildMessage } = agentMessageBuilder(role, name);
 
     messageBus.subscribe(this.messageListener.bind(this));
 
-    this.initAgent();
+    this.initAgent(initializeAgent, buildMessage);
   }
 
-  async initAgent() {
+  async initAgent(
+    initializeAgent: (goal: string) => OpenAIMessageRequestProps,
+    buildMessage: (
+      message: string,
+      prefix?: string | undefined
+    ) => OpenAIMessageRequestProps
+  ) {
     //add agent to list
     addAgents([this.agentID]);
 
     //create memory collection
+    await chromaDB.createCollection(this.agentID);
 
     //initialize agetns goals and action their first response
     processAIResponse(
       this.agentID,
-      await createChatCompletion(this.initializeAgent(this.agentGoal))
+      await createChatCompletion(initializeAgent(this.agentGoal))
     );
   }
 
   async sendMessageToAI(message: string) {
-    const newAImessage = this.buildMessage({ message });
-
-    const addMemory = await chromaDB.addDataToCollection(this.agentID, {
-      type: 'command',
-      content: JSON.stringify(newAImessage)
-    });
-
-    const memories = await this.memory.get(
-      undefined,
-      {
-        $or: [
-          {
-            type: {
-              $eq: 'choice'
-            }
-          },
-          {
-            type: {
-              $eq: 'command'
-            }
-          }
-        ]
-      },
-      undefined,
-      undefined,
-      [GetEmbeddingIncludeEnum.Documents]
+    //initialize agents goals and action their first response
+    const { buildMessage } = agentMessageBuilder(
+      this.agentName,
+      this.agentRole
     );
-
-    logger.debug(
-      'Agent',
-      'sendMessageToAI',
-      `memories: ${JSON.stringify(memories.documents.reverse())}`
-    );
-
     processAIResponse(
       this.agentID,
-      await createChatCompletion(
-        this.buildMessage({
-          messages: JSON.parse(memories.documents).reverse()
-        })
-      )
+      await createChatCompletion(buildMessage(message))
     );
   }
 
@@ -132,11 +86,9 @@ export class Agent {
         case 'error':
           this.sendMessageToAI(message.content);
           break;
-        case 'agent':
+        case 'action':
           break;
-        case 'update':
-          break;
-        case 'random':
+        case 'decision':
           break;
       }
     }

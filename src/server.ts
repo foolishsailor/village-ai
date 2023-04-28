@@ -1,7 +1,8 @@
 import * as dotenv from 'dotenv';
-import { chromaDB, client } from '@/services/vectorDB/chroma-db-service';
+import { client } from '@/services/vectorDB/chroma-db-service';
 import SocketServer from '@/services/socket-server/socket-server';
 import { logger, LogLevel, LogOptions } from '@/services/logger';
+import { Agent } from '@/agents/agent';
 
 const options: LogOptions = {
   toConsole: true,
@@ -9,18 +10,16 @@ const options: LogOptions = {
   filePath: 'logs.txt'
 };
 
-logger.setOptions(LogLevel.Info, options);
-
-import { agent } from '@/agents/agent';
+logger.setOptions(LogLevel.Debug, options);
 
 dotenv.config();
 
 SocketServer(4331);
 
 (async () => {
-  //client.reset();
+  await client.reset();
 
-  const manager = agent({
+  const manager = new Agent({
     name: 'Bob',
     role: 'Manager',
     goal: 'You need to build a team that can tell me how to build a house in california'

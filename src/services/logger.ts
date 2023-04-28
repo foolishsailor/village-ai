@@ -47,9 +47,11 @@ class Logger {
   ): string {
     const timestamp = new Date().toISOString();
     const levelStr = LogLevel[level];
-    const formattedMessage = chalk.keyword(color)(
-      `[${timestamp}] [${levelStr}] ${className}.${functionName} : ${message}`
-    );
+    const formattedMessage = `[${chalk.keyword(color)(
+      timestamp
+    )}] [${chalk.keyword(color)(levelStr)}] ${chalk.cyan(
+      className
+    )}.${chalk.green(functionName)} : ${message}`;
     return formattedMessage;
   }
 

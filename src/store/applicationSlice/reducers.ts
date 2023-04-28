@@ -1,4 +1,4 @@
-import { openAImodel } from '@/types/open-ai-model';
+import { OpenAImodelTypes } from '@/types/openai';
 import { PayloadAction } from '@reduxjs/toolkit';
 
 import { ApplicationState } from './state';
@@ -29,7 +29,7 @@ export const reducers = {
   },
   setModelType: (
     state: ApplicationState,
-    action: PayloadAction<openAImodel>
+    action: PayloadAction<OpenAImodelTypes>
   ) => {
     state.modelType = action.payload;
   },
