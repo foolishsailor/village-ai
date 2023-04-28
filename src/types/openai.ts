@@ -37,7 +37,7 @@ export interface OpenAIModel {
 export type OpenAIMessageRequestProps = {
   key?: string;
   model?: OpenAIModel;
-  systemPrompt?: string;
+  systemPrompt: string;
   temperature?: number;
   tokens?: number;
   messages: OpenAIMessage[];

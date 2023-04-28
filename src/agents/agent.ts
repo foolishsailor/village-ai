@@ -13,9 +13,10 @@ import {
 import { addAgents } from '@/store/applicationSlice';
 import { processAIResponse } from './process-ai-response';
 import { logger } from '@/services/logger';
-import { OpenAIMessageRequestProps } from '@/types/openai';
+import { OpenAIMessage, OpenAIMessageRequestProps } from '@/types/openai';
 import { Collection } from 'chromadb';
 import { GetEmbeddingIncludeEnum } from 'chromadb/dist/main/generated';
+import { ChromaMemory } from '@/types/memory';
 
 export type AgentProps = {
   name: string;
@@ -35,16 +36,21 @@ export class Agent {
     prefix,
     messages
   }: MessageBuilder) => OpenAIMessageRequestProps;
+  processMemoriesIntoOpenAImessages: (
+    memories: ChromaMemory
+  ) => OpenAIMessage[];
 
   constructor({ name, role, goal }: AgentProps) {
     const {
       application: { numberOfAgents }
     } = store.getState();
 
-    const { initializeAgent, buildMessage } = agentMessageBuilder(role, name);
+    const { initializeAgent, buildMessage, processMemoriesIntoOpenAImessages } =
+      agentMessageBuilder(role, name);
 
     this.initializeAgent = initializeAgent;
     this.buildMessage = buildMessage;
+    this.processMemoriesIntoOpenAImessages = processMemoriesIntoOpenAImessages;
     this.agentID = `${name}_${(numberOfAgents + 1).toString()}`.toLowerCase();
     this.agentName = name;
     this.agentGoal = goal;
@@ -53,66 +59,71 @@ export class Agent {
       this.memory = await chromaDB.createCollection(
         `${name}_${(numberOfAgents + 1).toString()}`.toLowerCase()
       );
+
+      this.initAgent();
     })();
 
     messageBus.subscribe(this.messageListener.bind(this));
-
-    this.initAgent();
   }
 
   async initAgent() {
     //add agent to list
     addAgents([this.agentID]);
 
-    //create memory collection
+    const initialiPrompt = this.initializeAgent(this.agentGoal);
+
+    logger.debug(
+      'Agent',
+      'initAgent',
+      `initialiPrompt: ${initialiPrompt.messages[0].content}`
+    );
+
+    const addMemory = await chromaDB.addDataToCollection(this.agentID, {
+      types: [
+        { DocumentType: 'OpenAi', MessageType: 'system' },
+        { DocumentType: 'OpenAi', MessageType: 'user' }
+      ],
+      content: [initialiPrompt.systemPrompt, initialiPrompt.messages[0].content]
+    });
 
     //initialize agetns goals and action their first response
-    processAIResponse(
-      this.agentID,
-      await createChatCompletion(this.initializeAgent(this.agentGoal))
-    );
+    processAIResponse(this.agentID, await createChatCompletion(initialiPrompt));
   }
 
   async sendMessageToAI(message: string) {
     const newAImessage = this.buildMessage({ message });
 
     const addMemory = await chromaDB.addDataToCollection(this.agentID, {
-      type: 'command',
-      content: JSON.stringify(newAImessage)
+      types: [{ DocumentType: 'OpenAi', MessageType: 'user' }],
+      content: [message]
     });
 
-    const memories = await this.memory.get(
-      undefined,
-      {
-        $or: [
-          {
-            type: {
-              $eq: 'choice'
-            }
-          },
-          {
-            type: {
-              $eq: 'command'
-            }
-          }
-        ]
-      },
-      undefined,
-      undefined,
-      [GetEmbeddingIncludeEnum.Documents]
-    );
+    const memories = await this.memory.get(undefined, {
+      DocumentType: {
+        $eq: 'OpenAi'
+      }
+    });
 
     logger.debug(
       'Agent',
       'sendMessageToAI',
-      `memories: ${JSON.stringify(memories.documents.reverse())}`
+      `memories: ${JSON.stringify(memories, null, 2)}`
+    );
+    logger.debug(
+      'Agent',
+      'sendMessageToAI',
+      `memoriesToMessages: ${JSON.stringify(
+        this.processMemoriesIntoOpenAImessages(memories),
+        null,
+        2
+      )}`
     );
 
     processAIResponse(
       this.agentID,
       await createChatCompletion(
         this.buildMessage({
-          messages: JSON.parse(memories.documents).reverse()
+          messages: this.processMemoriesIntoOpenAImessages(memories).reverse()
         })
       )
     );

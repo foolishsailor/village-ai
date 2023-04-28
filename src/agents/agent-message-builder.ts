@@ -2,6 +2,7 @@ import { OpenAIMessage, OpenAIMessageRequestProps } from '@/types/openai';
 import { RoleTypes } from '@/types/roles';
 import { actionNames } from './actions';
 import { core } from './prompts';
+import { ChromaMemory } from '@/types/memory';
 
 export interface MessageBuilder {
   message?: string;
@@ -36,6 +37,7 @@ export const agentMessageBuilder = (roleType: RoleTypes, agentName: string) => {
       prefix
     }: MessageBuilder): OpenAIMessageRequestProps => {
       return {
+        systemPrompt: '',
         messages: message
           ? [
               ...messages,
@@ -47,6 +49,16 @@ export const agentMessageBuilder = (roleType: RoleTypes, agentName: string) => {
           : [...messages],
         temperature: role.temperature
       };
+    },
+    processMemoriesIntoOpenAImessages: (
+      memories: ChromaMemory
+    ): OpenAIMessage[] => {
+      return memories.documents.map((document, i) => {
+        return {
+          role: memories.metadatas ? memories.metadatas[i].MessageType : '',
+          content: document
+        };
+      });
     }
   };
 };

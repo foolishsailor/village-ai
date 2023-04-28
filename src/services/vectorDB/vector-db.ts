@@ -123,16 +123,32 @@ export class VectorDB {
         `collection found: ${collectionName}`
       );
 
-      const memoryCount = await collection.count();
+      const memoryCount: number = await collection.count();
 
       logger.debug(
         'VectorDB',
         'addDataToCollection',
-        `embedMemory: ${memory.content}`
+        `embedTypes: ${JSON.stringify(memory.types)}`
+      );
+
+      logger.debug(
+        'VectorDB',
+        'addDataToCollection',
+        `embedMemories: ${JSON.stringify(memory.content)}`
+      );
+
+      console.log(
+        '=================>',
+        memoryCount,
+        Array.from({ length: memory.content.length }, (_, i) =>
+          (i + memoryCount + 1).toString()
+        )
       );
 
       return await collection.add(
-        (memoryCount + 1).toString(),
+        Array.from({ length: memory.content.length }, (_, i) =>
+          (i + memoryCount + 1).toString()
+        ),
         undefined,
         memory.types,
         memory.content

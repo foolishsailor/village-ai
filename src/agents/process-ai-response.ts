@@ -19,15 +19,14 @@ export const processAIResponse = async (
   const lastMessage = agentResponse.choices[0].message.content;
 
   const addMemory = await chromaDB.addDataToCollection(agentId, {
-    types: [{ DocumentType: 'OpenAi' }, { MessageType: 'message' }],
-    content: JSON.stringify(agentResponse.choices[0])
+    types: [{ DocumentType: 'OpenAi', MessageType: 'assistant' }],
+    content: [lastMessage]
   });
 
   const memories = await collection?.get();
 
   console.log('getMemory', memories);
 
-  //start decision response cycle
   const parsedMessage = parseMessage(lastMessage);
 
   logger.info(

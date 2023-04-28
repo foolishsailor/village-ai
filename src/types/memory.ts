@@ -13,12 +13,19 @@ export type DocumentTypes = 'OpenAi' | 'Memory';
 export type PropertyTypes = 'DocumentType' | 'MessageType';
 
 export interface Memory {
-  types: Array<{
+  types: {
     [key in PropertyTypes]?: key extends 'DocumentType'
       ? DocumentTypes
       : key extends 'MessageType'
       ? MessageTypes
       : never;
-  }>;
-  content: string;
+  }[];
+  content: string[];
+}
+
+export interface ChromaMemory {
+  ids: string[];
+  embeddings?: any[];
+  documents: string[];
+  metadatas?: any[];
 }
