@@ -13,6 +13,7 @@ import { processAIResponse } from '@/utils/process-ai-response';
 import { OpenAIMessageRequestProps } from '@/types/openai';
 import { Collection } from 'chromadb';
 import { parseMemoriestoMessages } from '@/utils/parse-message';
+import { TaskQueueManager } from '@/services/tasks';
 
 export type AgentProps = {
   name: string;
@@ -33,6 +34,7 @@ export class Agent {
     prefix,
     messages
   }: MessageBuilder) => OpenAIMessageRequestProps;
+  taskQueueManager: TaskQueueManager;
 
   constructor({ name, role, goal }: AgentProps) {
     const {
@@ -47,6 +49,13 @@ export class Agent {
     this.name = name;
     this.goal = goal;
     this.role = role;
+    this.taskQueueManager = new TaskQueueManager(
+      this.messageProcessor.bind(this)
+    );
+
+    messageBus.subscribe(this.messageListener.bind(this));
+
+    this.taskQueueManager.start();
 
     (async () => {
       this.memory = await chromaDB.createCollection(
@@ -55,11 +64,9 @@ export class Agent {
 
       this.initAgent();
     })();
-
-    messageBus.subscribe(this.messageListener.bind(this));
   }
 
-  async initAgent() {
+  private async initAgent() {
     store.dispatch(
       addAgents([
         {
@@ -90,7 +97,7 @@ export class Agent {
    * Sends a message to the AI and processes its response.
    * @param {string} message - The message to send to the AI.
    */
-  async sendMessageToAI(message: string) {
+  private async sendMessageToAI(message: string) {
     await chromaDB.addMemoriesToCollection(this.memory, {
       types: [{ DocumentType: 'OpenAi', MessageType: 'user' }],
       content: [message]
@@ -116,20 +123,45 @@ export class Agent {
 
   messageListener(message: Message) {
     if (message.type === MessageType.Message) {
-      const { content } = message;
+      this.taskQueueManager.push(message);
 
-      if (content.destination.includes(this.id)) {
-        switch (content.type) {
-          case 'error':
-            this.sendMessageToAI(content.content);
-            break;
-          case 'action':
-            break;
-          case 'decision':
-            break;
-        }
-      }
+      console.log(
+        'message listyener  this.messageQueue===============',
+        this.taskQueueManager.tasks.length
+      );
     }
+  }
+
+  messageProcessor(message: Message): () => Promise<void> {
+    console.log(
+      'this.taskQueueManager====================',
+      this.taskQueueManager
+    );
+
+    return async (): Promise<void> => {
+      return new Promise((resolve) => {
+        const {
+          application: { isRunning }
+        } = store.getState();
+
+        if (message.type === MessageType.Message) {
+          const { content } = message;
+
+          if (content.destination.includes(this.id)) {
+            switch (content.type) {
+              case 'error':
+                this.sendMessageToAI(content.content);
+                break;
+              case 'action':
+                break;
+              case 'decision':
+                break;
+            }
+          }
+        }
+        resolve();
+      });
+    };
   }
 
   addTask() {}

@@ -21,15 +21,18 @@ const socketMiddleware: Middleware = (storeApi) => (next) => async (action) => {
       changedState[key] = newState[key];
     }
   }
-  console.log('changedState===================', changedState);
+
   // Send the changed state as a  message
-  if (Object.keys(changedState).length > 0) {
+  if (
+    changedState.application &&
+    Object.keys(changedState.application).length > 0
+  ) {
     aILensSocketServer.emit({
       type: MessageType.State,
       content: {
         store: 'application',
         action: 'set',
-        properties: changedState
+        properties: changedState.application
       }
     });
   }

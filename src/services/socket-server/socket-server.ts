@@ -3,7 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { messageBus } from '@/services/message-bus';
 import * as dotenv from 'dotenv';
 import { Message, MessageType } from '@/types/message';
-import { setIsConnected } from '@/store/applicationSlice';
+import { setIsConnected, setIsRunning } from '@/store/applicationSlice';
 import store from '@/store';
 import { CommandActions } from './commands/command-actions';
 import { CommandActionsEnum } from './commands/command-types';
@@ -84,6 +84,7 @@ export class SocketServer {
       socket.on('disconnect', () => {
         console.log('A user disconnected');
         store.dispatch(setIsConnected(false));
+        store.dispatch(setIsRunning(false));
       });
     });
 

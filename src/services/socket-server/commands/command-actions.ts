@@ -1,11 +1,12 @@
 import { Agent } from '@/agents/agent';
+import store from '@/store';
+import { setIsRunning } from '@/store/applicationSlice';
 
 export const CommandActions = () => {
   return {
     start: (content: { id: string; name?: string; type?: string } | null) => {
       console.log('startSystem..........');
-      // Implement start system logic
-
+      store.dispatch(setIsRunning(true)); // Implement start system logic
       const manager = new Agent({
         name: 'Bob',
         role: 'Manager',
@@ -15,7 +16,7 @@ export const CommandActions = () => {
 
     stop: (content: { id: string; name?: string; type?: string } | null) => {
       console.log('stopSystem..........');
-      // Implement stop system logic
+      store.dispatch(setIsRunning(false));
     },
 
     addAgent: (

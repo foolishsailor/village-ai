@@ -1,3 +1,5 @@
+import { ApplicationState } from '@/store/applicationSlice';
+
 export type Stores = 'application' | 'agents';
 
 export interface StateGetAction {
@@ -9,7 +11,7 @@ export interface StateGetAction {
 export interface StateSetAction {
   action: 'set';
   store: Stores;
-  properties: Record<string, unknown>;
+  properties: Partial<ApplicationState>;
 }
 
 export type StateActions = StateGetAction | StateSetAction;

@@ -11,6 +11,7 @@ const slice = createSlice({
 
 export const {
   setIsConnected,
+  setIsRunning,
   addAgents,
   deleteAgents,
   setModelType,
