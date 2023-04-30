@@ -4,7 +4,8 @@ import { AILensSocketServer } from '@/services/socket-server/socket-server';
 import { MessageType } from '@/types/message';
 
 // Custom middleware to send only the changed state via WebSocket
-const socketMiddleware: Middleware = (storeApi) => (next) => (action) => {
+const socketMiddleware: Middleware = (storeApi) => (next) => async (action) => {
+  const aILensSocketServer = await AILensSocketServer;
   // Get the previous state
   const prevState = storeApi.getState();
 
@@ -20,12 +21,16 @@ const socketMiddleware: Middleware = (storeApi) => (next) => (action) => {
       changedState[key] = newState[key];
     }
   }
-
-  // Send the changed state as a stringified message, if there are any changes
+  console.log('changedState===================', changedState);
+  // Send the changed state as a  message
   if (Object.keys(changedState).length > 0) {
-    AILensSocketServer.emit({
+    aILensSocketServer.emit({
       type: MessageType.State,
-      content: { store: 'application', action: 'set', properties: changedState }
+      content: {
+        store: 'application',
+        action: 'set',
+        properties: changedState
+      }
     });
   }
 

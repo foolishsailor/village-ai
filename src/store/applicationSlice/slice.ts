@@ -11,10 +11,8 @@ const slice = createSlice({
 
 export const {
   setIsConnected,
-  setActiveAgents,
   addAgents,
-  deleteAgents: deteleAgents,
-  setNumberOfAgents,
+  deleteAgents,
   setModelType,
   setOpenAIKey,
   setTokensUsed

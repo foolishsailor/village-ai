@@ -23,6 +23,14 @@ export interface Memory {
   content: string[];
 }
 
+/**
+ * An interface that represents a Chroma memory.
+ * @interface ChromaMemory
+ * @property {string[]} ids - The IDs associated with the memory.
+ * @property {any[]} [embeddings] - The embeddings associated with the memory.
+ * @property {string[]} documents - The documents associated with the memory.
+ * @property {any[]} [metadatas] - The metadata associated with the memory.
+ */
 export interface ChromaMemory {
   ids: string[];
   embeddings?: any[];

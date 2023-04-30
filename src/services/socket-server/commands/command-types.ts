@@ -2,67 +2,67 @@
     
     Enumeration representing the available command actions.
     @typedef {object} CommandActions
-    @property {string} Start - Start the system.
-    @property {string} Stop - Stop the system.
-    @property {string} AddAgent - Add an agent to the system.
-    @property {string} RemoveAgent - Remove an agent from the system.
-    @property {string} StopAgent - Stop an agent.
-    @property {string} StartAgent - Start an agent.
-    @property {string} ChangeAgentType - Change the type of an agent.
-    @property {string} ChangeAgentName - Change the name of an agent.
+    @property {string} start - start the system.
+    @property {string} stop - stop the system.
+    @property {string} addAgent - add an agent to the system.
+    @property {string} removeAgent - remove an agent from the system.
+    @property {string} stopAgent - stop an agent.
+    @property {string} startAgent - start an agent.
+    @property {string} changeAgentType - change the type of an agent.
+    @property {string} changeAgentName - change the name of an agent.
 */
-export enum CommandActions {
-  Start = 'start',
-  Stop = 'stop',
-  AddAgent = 'addAgent',
-  RemoveAgent = 'removeAgent',
-  StopAgent = 'stopAgent',
-  StartAgent = 'startAgent',
-  ChangeAgentType = 'changeAgentType',
-  ChangeAgentName = 'changeAgentName'
+export enum CommandActionsEnum {
+  start = 'start',
+  stop = 'stop',
+  addAgent = 'addAgent',
+  removeAgent = 'removeAgent',
+  stopAgent = 'stopAgent',
+  startAgent = 'startAgent',
+  changeAgentType = 'changeAgentType',
+  changeAgentName = 'changeAgentName'
 }
 
 /**
 
     Type definition for mapping command actions to their respective messages.
     @typedef {object} CommandActionToMessage
-    @property {object} Start - Start action with content set to null.
-    @property {object} Stop - Stop action with content set to null.
-    @property {object} AddAgent - AddAgent action with content containing id, name, and type.
-    @property {object} RemoveAgent - RemoveAgent action with content containing id.
-    @property {object} StopAgent - StopAgent action with content containing id.
-    @property {object} StartAgent - StartAgent action with content containing id.
-    @property {object} ChangeAgentType - ChangeAgentType action with content containing id and type.
-    @property {object} ChangeAgentName - ChangeAgentName action with content containing id and name.
+    @property {object} start - start action with content set to null.
+    @property {object} stop - stop action with content set to null.
+    @property {object} addAgent - addAgent action with content containing id, name, and type.
+    @property {object} removeAgent - removeAgent action with content containing id.
+    @property {object} stopAgent - stopAgent action with content containing id.
+    @property {object} startAgent - startAgent action with content containing id.
+    @property {object} changeAgentType - changeAgentType action with content containing id and type.
+    @property {object} changeAgentName - changeAgentName action with content containing id and name.
     */
 export type CommandActionToMessage = {
-  [CommandActions.Start]: {
-    action: CommandActions.Start;
+  [CommandActionsEnum.start]: {
+    action: CommandActionsEnum.start;
     content: null;
   };
-  [CommandActions.Stop]: { action: CommandActions.Stop; content: null };
-  [CommandActions.AddAgent]: {
-    action: CommandActions.AddAgent;
+  [CommandActionsEnum.stop]: { action: CommandActionsEnum.stop; content: null };
+  [CommandActionsEnum.addAgent]: {
+    action: CommandActionsEnum.addAgent;
     content: { id: string; name?: string; type?: string };
   };
-  [CommandActions.RemoveAgent]: {
-    action: CommandActions.RemoveAgent;
+  [CommandActionsEnum.removeAgent]: {
+    action: CommandActionsEnum.removeAgent;
     content: { id: string };
   };
-  [CommandActions.StopAgent]: {
-    action: CommandActions.StopAgent;
+  [CommandActionsEnum.stopAgent]: {
+    action: CommandActionsEnum.stopAgent;
     content: { id: string };
   };
-  [CommandActions.StartAgent]: {
-    action: CommandActions.StartAgent;
+  [CommandActionsEnum.startAgent]: {
+    action: CommandActionsEnum.startAgent;
     content: { id: string };
   };
-  [CommandActions.ChangeAgentType]: {
-    action: CommandActions.ChangeAgentType;
+  [CommandActionsEnum.changeAgentType]: {
+    action: CommandActionsEnum.changeAgentType;
     content: { id: string; type: string };
   };
-  [CommandActions.ChangeAgentName]: {
-    action: CommandActions.ChangeAgentName;
+  [CommandActionsEnum.changeAgentName]: {
+    action: CommandActionsEnum.changeAgentName;
     content: { id: string; name: string };
   };
 };
@@ -81,8 +81,8 @@ export type CommandActionToMessage = {
     @property {function} changeAgentName - Function to change the agent name.
     */
 export type CommandActionsType = {
-  startSystem: () => void;
-  stopSystem: () => void;
+  start: () => void;
+  stop: () => void;
   addAgent: (content: { id: string; name?: string; type?: string }) => void;
   removeAgent: (content: { id: string }) => void;
   stopAgent: (content: { id: string }) => void;

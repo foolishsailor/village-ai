@@ -1,5 +1,5 @@
 import {
-  CommandActions,
+  CommandActionsEnum,
   CommandActionsType,
   CommandActionToMessage
 } from './command-types';
@@ -17,28 +17,28 @@ export const commandMessageReducer: ProcessMessageFunction = (
   actions
 ) => {
   switch (message.action) {
-    case CommandActions.Start:
-      actions.startSystem();
+    case CommandActionsEnum.start:
+      actions.start();
       break;
-    case CommandActions.Stop:
-      actions.stopSystem();
+    case CommandActionsEnum.stop:
+      actions.stop();
       break;
-    case CommandActions.AddAgent:
+    case CommandActionsEnum.addAgent:
       actions.addAgent(message.content);
       break;
-    case CommandActions.RemoveAgent:
+    case CommandActionsEnum.removeAgent:
       actions.removeAgent(message.content);
       break;
-    case CommandActions.StopAgent:
+    case CommandActionsEnum.stopAgent:
       actions.stopAgent(message.content);
       break;
-    case CommandActions.StartAgent:
+    case CommandActionsEnum.startAgent:
       actions.startAgent(message.content);
       break;
-    case CommandActions.ChangeAgentType:
+    case CommandActionsEnum.changeAgentType:
       actions.changeAgentType(message.content);
       break;
-    case CommandActions.ChangeAgentName:
+    case CommandActionsEnum.changeAgentName:
       actions.changeAgentName(message.content);
       break;
     default:

@@ -1,7 +1,7 @@
 import store from '@/store';
 import { RoleTypes } from '@/types/roles';
 import { messageBus } from '@/services/message-bus';
-import { CommsMessage, Message, MessageType } from '@/types/message';
+import { Message, MessageType } from '@/types/message';
 import { createChatCompletion } from '@/services/api/openai';
 import { chromaDB } from '@/services/vectorDB/chroma-db-service';
 import {
@@ -9,8 +9,7 @@ import {
   MessageBuilder
 } from '@/agents/agent-message-builder';
 import { addAgents } from '@/store/applicationSlice';
-import { processAIResponse } from './process-ai-response';
-import { logger } from '@/services/logger';
+import { processAIResponse } from '@/utils/process-ai-response';
 import { OpenAIMessageRequestProps } from '@/types/openai';
 import { Collection } from 'chromadb';
 import { parseMemoriestoMessages } from '@/utils/parse-message';
@@ -22,10 +21,11 @@ export type AgentProps = {
 };
 
 export class Agent {
-  agentID: string;
-  agentName: string;
-  agentGoal: string;
-  agentTasks: string[] = [];
+  id: string;
+  name: string;
+  goal: string;
+  role: RoleTypes;
+  tasks: string[] = [];
   memory!: Collection;
   initializeAgent: (goal: string) => OpenAIMessageRequestProps;
   buildMessage: ({
@@ -36,20 +36,21 @@ export class Agent {
 
   constructor({ name, role, goal }: AgentProps) {
     const {
-      application: { numberOfAgents }
+      application: { agents }
     } = store.getState();
 
     const { initializeAgent, buildMessage } = agentMessageBuilder(role, name);
 
     this.initializeAgent = initializeAgent;
     this.buildMessage = buildMessage;
-    this.agentID = `${name}_${(numberOfAgents + 1).toString()}`.toLowerCase();
-    this.agentName = name;
-    this.agentGoal = goal;
+    this.id = `${name}_${(agents.length + 1).toString()}`.toLowerCase();
+    this.name = name;
+    this.goal = goal;
+    this.role = role;
 
     (async () => {
       this.memory = await chromaDB.createCollection(
-        `${name}_${(numberOfAgents + 1).toString()}`.toLowerCase()
+        `${name}_${(agents.length + 1).toString()}`.toLowerCase()
       );
 
       this.initAgent();
@@ -59,23 +60,36 @@ export class Agent {
   }
 
   async initAgent() {
-    //add agent to list
-    addAgents([this.agentID]);
+    store.dispatch(
+      addAgents([
+        {
+          id: this.id,
+          name: this.name,
+          role: this.role,
+          goal: this.goal,
+          tasks: this.tasks
+        }
+      ])
+    );
 
-    const initialiPrompt = this.initializeAgent(this.agentGoal);
+    const initialPrompt = this.initializeAgent(this.goal);
 
     await chromaDB.addMemoriesToCollection(this.memory, {
       types: [
         { DocumentType: 'OpenAi', MessageType: 'system' },
         { DocumentType: 'OpenAi', MessageType: 'user' }
       ],
-      content: [initialiPrompt.systemPrompt, initialiPrompt.messages[0].content]
+      content: [initialPrompt.systemPrompt, initialPrompt.messages[0].content]
     });
 
     //initialize agetns goals and action their first response
-    processAIResponse(this.agentID, await createChatCompletion(initialiPrompt));
+    processAIResponse(this.id, await createChatCompletion(initialPrompt));
   }
 
+  /**
+   * Sends a message to the AI and processes its response.
+   * @param {string} message - The message to send to the AI.
+   */
   async sendMessageToAI(message: string) {
     await chromaDB.addMemoriesToCollection(this.memory, {
       types: [{ DocumentType: 'OpenAi', MessageType: 'user' }],
@@ -89,7 +103,7 @@ export class Agent {
     });
 
     processAIResponse(
-      this.agentID,
+      this.id,
       await createChatCompletion(
         this.buildMessage({
           messages: parseMemoriestoMessages(memories)
@@ -104,16 +118,14 @@ export class Agent {
     if (message.type === MessageType.Message) {
       const { content } = message;
 
-      if (content.destination.includes(this.agentID)) {
+      if (content.destination.includes(this.id)) {
         switch (content.type) {
           case 'error':
             this.sendMessageToAI(content.content);
             break;
-          case 'agent':
+          case 'action':
             break;
-          case 'update':
-            break;
-          case 'random':
+          case 'decision':
             break;
         }
       }

@@ -1,7 +1,7 @@
 import { error } from '@/agents/prompts/error-response';
 import { CODE_BLOCK_DELIMITER, MULTILINE_DELIMITER } from '@/config/defaults';
 import { ChromaMemory } from '@/types/memory';
-import { MessageType, ParsedMessageType } from '@/types/message';
+import { MessageContentType } from '@/types/message';
 import { OpenAIMessage } from '@/types/openai';
 
 type Action = {
@@ -20,12 +20,17 @@ const actionsData: ActionsData = {
 
 //----------------------------------------------
 type ParsedMessage = {
-  type: ParsedMessageType;
+  type: MessageContentType;
   message?: string;
   thoughts?: string;
   actions?: Action[];
 };
 
+/**
+ * Parses a message received from the OpenAI API into an object that represents the message's contents.
+ * @param {string} content - The content of the message to parse.
+ * @returns {ParsedMessage} An object representing the contents of the parsed message.
+ */
 export function parseMessageToAction(content: string): ParsedMessage {
   const delimiter = new RegExp(CODE_BLOCK_DELIMITER, 'g');
   const multilineDelimiter = new RegExp(MULTILINE_DELIMITER, 'g');
@@ -95,6 +100,11 @@ export function parseMessageToAction(content: string): ParsedMessage {
   return parsedData;
 }
 
+/**
+ * Converts a collection of Chroma memories to an array of OpenAI messages.
+ * @param {ChromaMemory} memories - The collection of Chroma memories to convert.
+ * @returns {OpenAIMessage[]} An array of OpenAI messages extracted from the provided Chroma memories.
+ */
 export const parseMemoriestoMessages = (
   memories: ChromaMemory
 ): OpenAIMessage[] => {
@@ -107,7 +117,6 @@ export const parseMemoriestoMessages = (
   });
 
   retreivedMemories.sort((a, b) => {
-    // Use a localeCompare() method to compare the string values of the id property as numbers
     return a.id.localeCompare(b.id, undefined, { numeric: true });
   });
 

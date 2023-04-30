@@ -1,3 +1,4 @@
+import { Agent } from '@/types/agent';
 import { OpenAImodelTypes } from '@/types/openai';
 import { PayloadAction } from '@reduxjs/toolkit';
 
@@ -7,25 +8,13 @@ export const reducers = {
   setIsConnected: (state: ApplicationState, action: PayloadAction<boolean>) => {
     state.isConnected = action.payload;
   },
-  setActiveAgents: (
-    state: ApplicationState,
-    action: PayloadAction<string[]>
-  ) => {
-    state.agents = action.payload;
-  },
-  addAgents: (state: ApplicationState, action: PayloadAction<string[]>) => {
+  addAgents: (state: ApplicationState, action: PayloadAction<Agent[]>) => {
     state.agents = [...state.agents, ...action.payload];
   },
   deleteAgents: (state: ApplicationState, action: PayloadAction<string[]>) => {
     state.agents = state.agents.filter(
-      (agent) => !action.payload.includes(agent)
+      (agent) => !action.payload.includes(agent.id)
     );
-  },
-  setNumberOfAgents: (
-    state: ApplicationState,
-    action: PayloadAction<number>
-  ) => {
-    state.numberOfAgents = action.payload;
   },
   setModelType: (
     state: ApplicationState,
