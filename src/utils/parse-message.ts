@@ -1,6 +1,8 @@
 import { error } from '@/agents/prompts/error-response';
 import { CODE_BLOCK_DELIMITER, MULTILINE_DELIMITER } from '@/config/defaults';
+import { ChromaMemory } from '@/types/memory';
 import { MessageType, ParsedMessageType } from '@/types/message';
+import { OpenAIMessage } from '@/types/openai';
 
 type Action = {
   action: string;
@@ -24,7 +26,7 @@ type ParsedMessage = {
   actions?: Action[];
 };
 
-export function parseMessage(content: string): ParsedMessage {
+export function parseMessageToAction(content: string): ParsedMessage {
   const delimiter = new RegExp(CODE_BLOCK_DELIMITER, 'g');
   const multilineDelimiter = new RegExp(MULTILINE_DELIMITER, 'g');
 
@@ -92,3 +94,22 @@ export function parseMessage(content: string): ParsedMessage {
 
   return parsedData;
 }
+
+export const parseMemoriestoMessages = (
+  memories: ChromaMemory
+): OpenAIMessage[] => {
+  const retreivedMemories = memories.documents.map((document, i) => {
+    return {
+      role: memories.metadatas ? memories.metadatas[i].MessageType : '',
+      content: document,
+      id: memories.ids[i]
+    };
+  });
+
+  retreivedMemories.sort((a, b) => {
+    // Use a localeCompare() method to compare the string values of the id property as numbers
+    return a.id.localeCompare(b.id, undefined, { numeric: true });
+  });
+
+  return retreivedMemories.map(({ role, content }) => ({ role, content }));
+};

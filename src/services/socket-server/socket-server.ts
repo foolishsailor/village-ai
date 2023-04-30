@@ -1,57 +1,61 @@
 import { createServer } from 'http';
 import { Server as IOServer, Socket } from 'socket.io';
 import { messageBus } from '@/services/message-bus';
+import * as dotenv from 'dotenv';
+import { Message } from '@/types/message';
 
-import { commandMessageReducer } from './commands/command-reducer';
-import { CommandActions } from './commands/command-actions';
+dotenv.config();
 
-const SocketServer = (port: number): void => {
-  const httpServer = createServer();
-  const io = new IOServer(httpServer, {
-    cors: {
-      origin: '*'
+export class SocketServer {
+  private static instance: SocketServer;
+  private httpServer: any;
+  private io: any;
+
+  private constructor() {}
+
+  public static getInstance(port: number): SocketServer {
+    if (!SocketServer.instance) {
+      SocketServer.instance = new SocketServer();
+      SocketServer.instance.init(port);
     }
-  });
 
-  const commandActions = CommandActions();
+    return SocketServer.instance;
+  }
 
-  io.on('connection', (socket: Socket) => {
-    console.log('A user connected');
+  public emit(message: Message): void {
+    this.io.emit('message', message);
+  }
 
-    messageBus.subscribe((message) => {
-      socket.emit('message', message);
-    });
-
-    socket.on('message', (message) => {
-      switch (message.type) {
-        case 'state':
-          //stateMessageReducer(message.content);
-          break;
-
-        case 'command':
-          commandMessageReducer(message.content, commandActions);
-          break;
-
-        case 'message':
-          messageBus.send({
-            type: 'agent',
-            sourceType: 'agent',
-            source: message.agentIds || '',
-            destination: message.destination || [],
-            content: message.content
-          });
-          break;
+  private init(port: number): void {
+    this.httpServer = createServer();
+    this.io = new IOServer(this.httpServer, {
+      cors: {
+        origin: '*'
       }
     });
 
-    socket.on('disconnect', () => {
-      console.log('A user disconnected');
+    this.io.on('connection', (socket: Socket) => {
+      console.log('A user connected');
+
+      messageBus.subscribe((message) => {
+        socket.emit('message', message);
+      });
+
+      socket.on('message', (message) => {
+        messageBus.send(message);
+      });
+
+      socket.on('disconnect', () => {
+        console.log('A user disconnected');
+      });
     });
-  });
 
-  httpServer.listen(port, () => {
-    console.log(`Socket.IO server is listening on port ${port}`);
-  });
-};
+    this.httpServer.listen(port, () => {
+      console.log(`Socket.IO server is listening on port ${port}`);
+    });
+  }
+}
 
-export default SocketServer;
+export const AILensSocketServer = SocketServer.getInstance(
+  Number(process.env.AI_LENS_SOCKET_PORT)
+);

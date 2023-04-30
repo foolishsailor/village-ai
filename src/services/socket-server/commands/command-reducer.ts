@@ -1,8 +1,8 @@
 import {
-  CommandActionsEnum,
+  CommandActions,
   CommandActionsType,
-  CommandActionToMessage,
-} from "./command-types";
+  CommandActionToMessage
+} from './command-types';
 
 export type CommandMessage =
   CommandActionToMessage[keyof CommandActionToMessage];
@@ -17,31 +17,31 @@ export const commandMessageReducer: ProcessMessageFunction = (
   actions
 ) => {
   switch (message.action) {
-    case CommandActionsEnum.Start:
+    case CommandActions.Start:
       actions.startSystem();
       break;
-    case CommandActionsEnum.Stop:
+    case CommandActions.Stop:
       actions.stopSystem();
       break;
-    case CommandActionsEnum.AddAgent:
+    case CommandActions.AddAgent:
       actions.addAgent(message.content);
       break;
-    case CommandActionsEnum.RemoveAgent:
+    case CommandActions.RemoveAgent:
       actions.removeAgent(message.content);
       break;
-    case CommandActionsEnum.StopAgent:
+    case CommandActions.StopAgent:
       actions.stopAgent(message.content);
       break;
-    case CommandActionsEnum.StartAgent:
+    case CommandActions.StartAgent:
       actions.startAgent(message.content);
       break;
-    case CommandActionsEnum.ChangeAgentType:
+    case CommandActions.ChangeAgentType:
       actions.changeAgentType(message.content);
       break;
-    case CommandActionsEnum.ChangeAgentName:
+    case CommandActions.ChangeAgentName:
       actions.changeAgentName(message.content);
       break;
     default:
-      console.error("Invalid action:");
+      console.error('Invalid action:');
   }
 };

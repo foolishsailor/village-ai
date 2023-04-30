@@ -1,9 +1,7 @@
 import store from '@/store';
-import { core } from '@/agents/prompts';
-import { actionNames } from '@/agents/actions';
 import { RoleTypes } from '@/types/roles';
 import { messageBus } from '@/services/message-bus';
-import { Message } from '@/types/message';
+import { CommsMessage, Message, MessageType } from '@/types/message';
 import { createChatCompletion } from '@/services/api/openai';
 import { chromaDB } from '@/services/vectorDB/chroma-db-service';
 import {
@@ -13,10 +11,9 @@ import {
 import { addAgents } from '@/store/applicationSlice';
 import { processAIResponse } from './process-ai-response';
 import { logger } from '@/services/logger';
-import { OpenAIMessage, OpenAIMessageRequestProps } from '@/types/openai';
+import { OpenAIMessageRequestProps } from '@/types/openai';
 import { Collection } from 'chromadb';
-import { GetEmbeddingIncludeEnum } from 'chromadb/dist/main/generated';
-import { ChromaMemory } from '@/types/memory';
+import { parseMemoriestoMessages } from '@/utils/parse-message';
 
 export type AgentProps = {
   name: string;
@@ -36,21 +33,16 @@ export class Agent {
     prefix,
     messages
   }: MessageBuilder) => OpenAIMessageRequestProps;
-  processMemoriesIntoOpenAImessages: (
-    memories: ChromaMemory
-  ) => OpenAIMessage[];
 
   constructor({ name, role, goal }: AgentProps) {
     const {
       application: { numberOfAgents }
     } = store.getState();
 
-    const { initializeAgent, buildMessage, processMemoriesIntoOpenAImessages } =
-      agentMessageBuilder(role, name);
+    const { initializeAgent, buildMessage } = agentMessageBuilder(role, name);
 
     this.initializeAgent = initializeAgent;
     this.buildMessage = buildMessage;
-    this.processMemoriesIntoOpenAImessages = processMemoriesIntoOpenAImessages;
     this.agentID = `${name}_${(numberOfAgents + 1).toString()}`.toLowerCase();
     this.agentName = name;
     this.agentGoal = goal;
@@ -72,13 +64,7 @@ export class Agent {
 
     const initialiPrompt = this.initializeAgent(this.agentGoal);
 
-    logger.debug(
-      'Agent',
-      'initAgent',
-      `initialiPrompt: ${initialiPrompt.messages[0].content}`
-    );
-
-    const addMemory = await chromaDB.addDataToCollection(this.agentID, {
+    await chromaDB.addMemoriesToCollection(this.memory, {
       types: [
         { DocumentType: 'OpenAi', MessageType: 'system' },
         { DocumentType: 'OpenAi', MessageType: 'user' }
@@ -91,9 +77,7 @@ export class Agent {
   }
 
   async sendMessageToAI(message: string) {
-    const newAImessage = this.buildMessage({ message });
-
-    const addMemory = await chromaDB.addDataToCollection(this.agentID, {
+    await chromaDB.addMemoriesToCollection(this.memory, {
       types: [{ DocumentType: 'OpenAi', MessageType: 'user' }],
       content: [message]
     });
@@ -104,26 +88,11 @@ export class Agent {
       }
     });
 
-    logger.debug(
-      'Agent',
-      'sendMessageToAI',
-      `memories: ${JSON.stringify(memories, null, 2)}`
-    );
-    logger.debug(
-      'Agent',
-      'sendMessageToAI',
-      `memoriesToMessages: ${JSON.stringify(
-        this.processMemoriesIntoOpenAImessages(memories),
-        null,
-        2
-      )}`
-    );
-
     processAIResponse(
       this.agentID,
       await createChatCompletion(
         this.buildMessage({
-          messages: this.processMemoriesIntoOpenAImessages(memories).reverse()
+          messages: parseMemoriestoMessages(memories)
         })
       )
     );
@@ -132,23 +101,21 @@ export class Agent {
   // Other methods like addTask, removeTask, etc.
 
   messageListener(message: Message) {
-    if (message.destination.includes(this.agentID)) {
-      logger.info(
-        'agent',
-        'messageListener',
-        `message: ${JSON.stringify(message)}`
-      );
+    if (message.type === MessageType.Message) {
+      const { content } = message;
 
-      switch (message.type) {
-        case 'error':
-          this.sendMessageToAI(message.content);
-          break;
-        case 'agent':
-          break;
-        case 'update':
-          break;
-        case 'random':
-          break;
+      if (content.destination.includes(this.agentID)) {
+        switch (content.type) {
+          case 'error':
+            this.sendMessageToAI(content.content);
+            break;
+          case 'agent':
+            break;
+          case 'update':
+            break;
+          case 'random':
+            break;
+        }
       }
     }
   }

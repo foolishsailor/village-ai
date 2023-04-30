@@ -1,6 +1,5 @@
 import { Memory } from '@/types/memory';
 import { ChromaClient, Collection, OpenAIEmbeddingFunction } from 'chromadb';
-import { logger } from '@/services/logger';
 
 interface MyObject {
   name: string;
@@ -74,23 +73,11 @@ export class VectorDB {
       : false;
 
     if (collectionExists) {
-      logger.debug(
-        'VectorDB',
-        'createCollection',
-        `collection exists: ${collectionName}`
-      );
-
       return await this.vectorClient.getCollection(
         collectionName,
         this.embeddingService
       );
     } else {
-      logger.debug(
-        'VectorDB',
-        'createCollection',
-        `collection created: ${collectionName}`
-      );
-
       return await this.vectorClient.createCollection(
         collectionName,
         {},
@@ -99,60 +86,19 @@ export class VectorDB {
     }
   }
 
-  public async addDataToCollection(
-    collectionName: string,
+  public async addMemoriesToCollection(
+    collection: Collection,
     memory: Memory
   ): Promise<boolean> {
-    const collection = await this.vectorClient.getCollection(
-      collectionName,
-      this.embeddingService
+    const memoryCount: number = await collection.count();
+
+    return await collection.add(
+      Array.from({ length: memory.content.length }, (_, i) =>
+        (i + memoryCount + 1).toString()
+      ),
+      undefined,
+      memory.types,
+      memory.content
     );
-
-    if (!collection) {
-      logger.debug(
-        'VectorDB',
-        'addDataToCollection',
-        `collection not found: ${collectionName}`
-      );
-
-      return false;
-    } else {
-      logger.debug(
-        'VectorDB',
-        'addDataToCollection',
-        `collection found: ${collectionName}`
-      );
-
-      const memoryCount: number = await collection.count();
-
-      logger.debug(
-        'VectorDB',
-        'addDataToCollection',
-        `embedTypes: ${JSON.stringify(memory.types)}`
-      );
-
-      logger.debug(
-        'VectorDB',
-        'addDataToCollection',
-        `embedMemories: ${JSON.stringify(memory.content)}`
-      );
-
-      console.log(
-        '=================>',
-        memoryCount,
-        Array.from({ length: memory.content.length }, (_, i) =>
-          (i + memoryCount + 1).toString()
-        )
-      );
-
-      return await collection.add(
-        Array.from({ length: memory.content.length }, (_, i) =>
-          (i + memoryCount + 1).toString()
-        ),
-        undefined,
-        memory.types,
-        memory.content
-      );
-    }
   }
 }

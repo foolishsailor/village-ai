@@ -9,6 +9,7 @@ import {
   OPENAI_ORGANIZATION,
   DEFAULT_OPENAI_MODEL
 } from '@/config/defaults';
+import { logger } from '../logger';
 
 export class OpenAIError extends Error {
   type: string;
@@ -37,6 +38,30 @@ export const createChatCompletion = async ({
   tokens,
   messages
 }: OpenAIMessageRequestProps): Promise<OpenAIApiResponse> => {
+  logger.debug(
+    'openai',
+    'Request',
+    `message: ${JSON.stringify(
+      {
+        model: model || DEFAULT_OPENAI_MODEL,
+        messages: systemPrompt
+          ? [
+              {
+                role: 'system',
+                content: systemPrompt
+              },
+              ...messages
+            ]
+          : messages,
+        max_tokens: tokens || 1000,
+        temperature: temperature || 0.0,
+        stream: false
+      },
+      undefined,
+      2
+    )}`
+  );
+
   const res = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
@@ -85,5 +110,14 @@ export const createChatCompletion = async ({
     }
   }
 
-  return res.json();
+  const result = await res.json();
+  console.log('result', result);
+
+  logger.debug(
+    'openai',
+    'Response',
+    `message: ${JSON.stringify(result, undefined, 2)}`
+  );
+
+  return result;
 };
