@@ -1,4 +1,4 @@
-import { error } from '@/agents/prompts/error-response';
+import { error } from '@/agents/orgAgent/prompts/error-response';
 import { CODE_BLOCK_DELIMITER, MULTILINE_DELIMITER } from '@/config/defaults';
 import { ChromaMemory } from '@/types/memory';
 import { MessageContentType } from '@/types/message';

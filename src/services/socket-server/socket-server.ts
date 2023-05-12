@@ -5,8 +5,6 @@ import * as dotenv from 'dotenv';
 import { Message, MessageType } from '@/types/message';
 import { setIsConnected, setIsRunning } from '@/store/applicationSlice';
 import store from '@/store';
-import { CommandActions } from './commands/command-actions';
-import { CommandActionsEnum } from './commands/command-types';
 
 dotenv.config();
 
@@ -65,13 +63,8 @@ export class SocketServer {
       });
 
       socket.on('message', (message: Message) => {
-        const commandActions = CommandActions();
-
         switch (message.type) {
           case MessageType.Command:
-            commandActions[CommandActionsEnum[message.content.action]](
-              message.content.content
-            );
             break;
           case MessageType.State:
             break;

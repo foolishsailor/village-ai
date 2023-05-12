@@ -1,7 +1,3 @@
-import {
-  CommandActionToMessage,
-  CommandActionsEnum
-} from '@/services/socket-server/commands/command-types';
 import { StateActions } from './state';
 
 /**
@@ -58,5 +54,5 @@ export interface CommsMessage {
 
 export type Message =
   | StateMessage<StateActions>
-  | CommandMessage<CommandActionToMessage[CommandActionsEnum]>
+  | CommandMessage<string>
   | CommsMessage;

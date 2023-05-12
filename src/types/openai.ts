@@ -82,6 +82,13 @@ export enum OpenAIModelID {
   GPT_4_32K = 'gpt-4-32k'
 }
 
+export const contextWindowSize = {
+  [OpenAIModelID.GPT_3_5]: 4000,
+  [OpenAIModelID.GPT_3_5_AZ]: 4000,
+  [OpenAIModelID.GPT_4]: 8000,
+  [OpenAIModelID.GPT_4_32K]: 32000
+};
+
 // in case the `DEFAULT_MODEL` environment variable is not set or set to an unsupported model
 export const fallbackModelID = OpenAIModelID.GPT_3_5;
 
