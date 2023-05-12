@@ -7,12 +7,12 @@ import {
   LLMResult
 } from 'langchain/schema';
 
-class StreamingCallbackHandler extends BaseCallbackHandler {
+class ConsoleCallback extends BaseCallbackHandler {
   name = 'StreamingCallbackHandler';
   private static streamCallback?: (token: string) => void;
 
   static setStreamCallback(callback: (token: string) => void) {
-    StreamingCallbackHandler.streamCallback = callback;
+    ConsoleCallback.streamCallback = callback;
   }
 
   async handleChainStart(chain: { name: string }) {
@@ -25,18 +25,23 @@ class StreamingCallbackHandler extends BaseCallbackHandler {
 
   async handleChainEnd(output: ChainValues) {
     console.log(chalk.blue(`==== Finished chain ====`));
-    console.log(output);
+    console.log(chalk.magenta(JSON.stringify(output, null, 2)));
   }
 
   async handleLLMEnd(output: LLMResult) {
-    //console.log(chalk.magenta(`==== LLM end ====`), output);
+    console.log(
+      chalk.magenta(`==== LLM end ====`),
+      JSON.stringify(output, null, 2)
+    );
   }
 
   async handleAgentAction(action: AgentAction) {
     console.log(chalk.blue(`==== Agent Action ====`));
-    console.log(`${chalk.blue.bold(`    Agent Tool:`)} ${action.tool}`);
-    console.log(`${chalk.blue.bold(`   Agent Input:`)} ${action.toolInput}`);
-    console.log(`${chalk.blue.bold(`     Agent Log:`)} ${action.log}`);
+    console.log(action);
+    console.log(`${chalk.magenta('  Agent Action RAW:')} ${action}`);
+    console.log(`${chalk.green.bold(`    Agent Tool:`)} ${action.tool}`);
+    console.log(`${chalk.green.bold(`   Agent Input:`)} ${action.toolInput}`);
+    console.log(`${chalk.green.bold(`     Agent Log:`)} ${action.log}`);
   }
 
   async handleToolEnd(output: string) {
@@ -45,7 +50,7 @@ class StreamingCallbackHandler extends BaseCallbackHandler {
   }
 
   async handleText(text: string) {
-    console.log(chalk.dim(text));
+    console.log(text);
   }
 
   async handleAgentEnd(action: AgentFinish) {
@@ -61,9 +66,8 @@ class StreamingCallbackHandler extends BaseCallbackHandler {
   }
 
   async handleLLMNewToken(token: string) {
-    StreamingCallbackHandler.streamCallback &&
-      StreamingCallbackHandler.streamCallback(token);
+    ConsoleCallback.streamCallback && ConsoleCallback.streamCallback(token);
   }
 }
 
-export { StreamingCallbackHandler };
+export { ConsoleCallback };

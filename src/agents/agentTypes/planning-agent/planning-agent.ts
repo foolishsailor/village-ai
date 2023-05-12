@@ -7,7 +7,7 @@ import { WebBrowser } from 'langchain/tools/webbrowser';
 import { Calculator } from 'langchain/tools/calculator';
 import { SearchWeb } from '@/agents/tools/search-web';
 import { TaskManager } from '@/agents/tools/task-manager';
-import { StreamingCallbackHandler } from '@/agents/langchain/callbacks/streaming-callback';
+import { ConsoleCallback } from '@/agents/langchain/callbacks/console-callback';
 
 const {
   OPENAI_API_KEY,
@@ -25,7 +25,7 @@ export const run = async () => {
   const tools = [
     new WebBrowser({ model, embeddings }),
     new SearchWeb(GOOGLE_API_KEY, GOOGLE_SEARCH_ENGINE_ID),
-
+    new Calculator(),
     new TaskManager()
   ];
 
@@ -34,13 +34,11 @@ export const run = async () => {
   });
   console.log('Loaded agent.');
 
-  const input = `Create a list of tasks required to calculate how much all the whales in the world weight`;
+  const input = `Create a series of tasks that help calculate how much all the whales in the world weigh.  Make sure to identify at least 6 species weight as part of the process`;
 
   console.log(`Executing with input "${input}"...`);
 
-  const result = await executor.call({ input }, [
-    new StreamingCallbackHandler()
-  ]);
+  const result = await executor.call({ input }, [new ConsoleCallback()]);
 
   console.log(`Got output ${result.output}`);
 };

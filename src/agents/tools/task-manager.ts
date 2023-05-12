@@ -15,11 +15,13 @@ export class TaskManager extends Tool {
 
   constructor() {
     super();
-    this.name = 'Task Manager';
+    this.name = 'task-manager';
     this.tasks = [];
-    this.description = `Create, Edit and Update tasks that can be executed.  These tasks are used to help break large problems down into smaller problems.
 
-    The action for this task is: Task Manager
+    this.description = `Create, Edit and Update tasks that can be executed.  
+    These tasks are used to help break large problems down into smaller problems.
+    
+    The action for this task is: task-manager
 
     The action input options are listed below
     CreateTask:<Task>
@@ -30,11 +32,12 @@ export class TaskManager extends Tool {
 
     Examples:
 
-    CreateTask:Research Everest height
-    UpdateTask:Research Everest height|Completed
-    DeleteTask:Research Everest height
+    CreateTask:Search Web to find information on height of Mount Everest 
+    CreateTask:Height of Mount Everst was in meters use Calculator to convert to feet
+    UpdateTask:Search Web to find information on height of Mount Everest|Completed
+    DeleteTask:Search Web to find information on height of Mount Everest
 
-    MistakesAvoid:
+    Mistakes To Avoid:
 
     Spaces in function names or missing colon.
     No pipe between status and task.
@@ -43,7 +46,6 @@ export class TaskManager extends Tool {
   }
 
   async CreateTask(input: string) {
-    console.log('TaskManager.CreateTask', chalk.magenta(input));
     this.tasks.push({ name: input, status: 'Not Started' });
   }
 
@@ -88,10 +90,14 @@ export class TaskManager extends Tool {
         default:
           throw new Error(`Unknown command: ${command}`);
       }
-      return `Tasks:\n\n${this.tasks
+      const result = `Tasks:\n\n${this.tasks
         .map((task) => `- Task: "${task.name}"\n  Status: ${task.status}`)
         .join('\n\n')}`;
+
+      console.log('TaskManager._call', chalk.magenta(result));
+      return result;
     } catch (error: any) {
+      console.log('TaskManager.error', chalk.red(error.message));
       return error.message;
     }
   }
